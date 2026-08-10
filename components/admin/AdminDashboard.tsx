@@ -21,6 +21,26 @@ const ARABIC_MONTHS: Record<string, string> = {
   "12": "ديسمبر",
 };
 
+// canonical.properties stores these as English enum values.
+const PROPERTY_TYPE_LABELS: Record<string, string> = {
+  land: "أرض",
+  apartment: "شقة",
+  villa: "فيلا",
+  building: "عمارة",
+  tower: "برج",
+  duplex: "دوبلكس",
+  shop: "محل",
+  office: "مكتب",
+  exhibition: "معرض",
+  warehouse: "مستودع",
+  hotel: "فندق",
+  commercial_complex: "مجمع تجاري",
+};
+
+function propertyTypeLabel(type: string) {
+  return PROPERTY_TYPE_LABELS[type] ?? type;
+}
+
 const numberFormat = new Intl.NumberFormat("ar-SA-u-nu-latn", {
   maximumFractionDigits: 0,
 });
@@ -164,7 +184,9 @@ function MarketTab({ market }: { market: MarketIntelligence }) {
               const pct = totalByType ? (t.count / totalByType) * 100 : 0;
               return (
                 <div key={t.property_type} className="flex items-center gap-3">
-                  <span className="w-24 shrink-0 text-sm">{t.property_type}</span>
+                  <span className="w-24 shrink-0 text-sm">
+                    {propertyTypeLabel(t.property_type)}
+                  </span>
                   <div className="h-3 flex-1 overflow-hidden rounded bg-gray-800">
                     <div
                       className="h-full rounded bg-sky-500"
