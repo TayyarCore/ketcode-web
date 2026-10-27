@@ -7,36 +7,6 @@ const MAX_BODY_BYTES = 12_000;
 const CHAT_LIMIT = 20;
 const CHAT_WINDOW_MS = 60 * 60 * 1000;
 
-function outputText(payload: unknown) {
-  if (!payload || typeof payload !== "object" || !("output" in payload) || !Array.isArray(payload.output)) {
-    return "";
-  }
-
-  return payload.output
-    .flatMap((item) => {
-      if (!item || typeof item !== "object" || !("content" in item) || !Array.isArray(item.content)) return [];
-      return item.content.flatMap((content: unknown) => {
-        if (!content || typeof content !== "object" || !("text" in content)) return [];
-        return typeof content.text === "string" ? [content.text] : [];
-      });
-    })
-    .join("\n")
-    .trim();
-}
-
-async function isFlagged(apiKey: string, text: string) {
-  const response = await fetch("https://api.openai.com/v1/moderations", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "omni-moderation-latest", input: text }),
-    signal: AbortSignal.timeout(8_000),
-  });
-
-  if (!response.ok) throw new Error(`Moderation failed with ${response.status}`);
-  const payload = (await response.json()) as { results?: Array<{ flagged?: boolean }> };
-  return payload.results?.[0]?.flagged === true;
-}
-
 export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_BODY_BYTES) return Response.json({ error: "Request too large." }, { status: 413 });
@@ -58,35 +28,34 @@ export async function POST(request: Request) {
     return Response.json({ error: publicError(language, "unavailable") }, { status: 429 });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = process.env.OPENAI_MODEL;
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const model = process.env.OPENROUTER_MODEL;
   if (!apiKey || !model) {
     return Response.json({ error: publicError(language, "configuration") }, { status: 503 });
   }
 
   try {
-    const lastUserMessage = messages.at(-1)?.content ?? "";
-    if (await isFlagged(apiKey, lastUserMessage)) {
-      return Response.json({ reply: publicError(language, "unsafe") });
-    }
-
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": new URL(request.url).origin,
+        "X-Title": "Ket Code AI Sales Assistant Preview",
+      },
       body: JSON.stringify({
         model,
-        instructions: assistantInstructions(language),
-        input: messages,
-        max_output_tokens: 220,
-        store: false,
-        safety_identifier: sessionId,
+        messages: [{ role: "system", content: assistantInstructions(language) }, ...messages],
+        max_tokens: 220,
+        user: sessionId,
       }),
       signal: AbortSignal.timeout(20_000),
     });
 
-    if (!response.ok) throw new Error(`OpenAI response failed with ${response.status}`);
-    const reply = outputText(await response.json());
-    if (!reply) throw new Error("OpenAI response contained no text");
+    if (!response.ok) throw new Error(`OpenRouter response failed with ${response.status}`);
+    const payload = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const reply = payload.choices?.[0]?.message?.content?.trim() ?? "";
+    if (!reply) throw new Error("OpenRouter response contained no text");
 
     return Response.json({ reply: reply.slice(0, 1_500) });
   } catch (error) {

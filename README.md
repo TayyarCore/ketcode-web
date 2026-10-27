@@ -8,7 +8,9 @@ Independent Next.js preview for a bilingual Arabic/English website-design sales 
 2. Copy `.env.example` to `.env.local` and add the server-only credentials.
 3. Run `npm run dev` and open `http://localhost:3000`.
 
-The application fails closed when OpenAI or Supabase credentials are missing. Never expose `OPENAI_API_KEY` or `SUPABASE_SECRET_KEY` with a `NEXT_PUBLIC_` prefix.
+The application fails closed when OpenRouter or Supabase credentials are missing. Never expose `OPENROUTER_API_KEY` or `SUPABASE_SECRET_KEY` with a `NEXT_PUBLIC_` prefix.
+
+For the no-cost Preview configuration, set `OPENROUTER_MODEL=openrouter/free`. Free models have lower rate limits and are not intended for production traffic.
 
 ## Supabase
 
