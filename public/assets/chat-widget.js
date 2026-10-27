@@ -11,7 +11,7 @@
       saving: 'جارٍ الحفظ...', cancel: 'إلغاء', leadSaved: 'تم استلام طلبك. سيتواصل معك فريق KetCode بعد مراجعة الاحتياج.',
       turnLimit: 'وصلت المحادثة إلى الحد المسموح. يمكنك طلب متابعة بشرية.',
       genericError: 'تعذر إكمال الطلب الآن. حاول مرة أخرى.',
-      notice: 'مساعد رقمي لجمع احتياج موقعك. لا تشارك كلمات مرور أو بيانات دفع أو معلومات حساسة.'
+      notice: 'مساعد رقمي لجمع احتياج موقعك. تُعالج الرسائل عبر مزود ذكاء اصطناعي؛ لا تشارك كلمات مرور أو بيانات دفع أو معلومات حساسة.'
     },
     en: {
       title: 'KetCode Assistant', subtitle: "Let's define your website needs", open: 'Chat with us', close: 'Close',
@@ -24,7 +24,7 @@
       leadSaved: 'Your request was received. The KetCode team will review it and contact you.',
       turnLimit: 'This chat has reached its message limit. You can request a human follow-up.',
       genericError: 'The request could not be completed. Please try again.',
-      notice: 'A digital assistant for your website enquiry. Do not share passwords, payment details, or sensitive information.'
+      notice: 'A digital assistant for your website enquiry. Messages are processed by an AI provider; do not share passwords, payment details, or sensitive information.'
     }
   };
 
