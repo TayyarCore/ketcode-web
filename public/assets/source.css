@@ -57,6 +57,7 @@
 /* Contrast fixes (WCAG AA): small grey numerals and symbols */
 .name-plus,.name-equals,.service-number{color:#64748b}
 .chat-message time{color:#475569}
+.chat-reply,.chat-confirmed{color:#064e3b}
 
 /* Automation & AI section */
 .ai-section{background:var(--color-bg);border-block:1px solid var(--color-line)}
