@@ -1,6 +1,6 @@
 # Ket Code AI Sales Assistant — V1
 
-Status: Implementation specification (not deployed)
+Status: Core preview implemented (not deployed)
 
 ## Goal
 Convert ketcode.com visitors into qualified leads for website design and development services through a bilingual Arabic/English conversational assistant.
@@ -16,6 +16,18 @@ Convert ketcode.com visitors into qualified leads for website design and develop
 
 ## Architecture
 Use the existing Next.js app and a server-only `app/api/chat/route.ts` endpoint. Keep the OpenAI key in server environment variables only. Store lead data in a Ket Code-specific datastore; never use Tayyar production tables. No new Vercel project required by design, pending deployment verification.
+
+### Confirmed V1 decisions
+- AI provider: OpenAI Responses API, with the exact model selected through the server-only `OPENAI_MODEL` variable.
+- Approved service catalog: website design and development only.
+- Lead storage: the isolated Supabase project `ketcode-leads`, never a Tayyar database.
+- Temporary sales recipient: `info@ketcode.com`, configured through `SALES_NOTIFICATION_EMAIL` so it can be replaced with a new alias.
+
+### Current implementation boundary
+- Chat and lead endpoints, bilingual UI, explicit consent, input/output limits, moderation, and fail-closed behavior are implemented.
+- Supabase persistence is implemented with a server-only secret key and a least-privilege `leads` table migration.
+- Email delivery is not implemented because no sending service has been selected. The recipient is stored with the lead for later notification wiring.
+- The in-memory rate limit is a lightweight first barrier. A shared server-side limiter is still required before public launch because serverless instances do not share memory.
 
 ## Security and cost
 - Rate limit per IP/session, message-length and turn caps, per-request token ceilings, strict input validation, abuse detection.
@@ -33,8 +45,10 @@ Use the existing Next.js app and a server-only `app/api/chat/route.ts` endpoint.
 6. Existing site remains functional; build, lint and preview smoke tests pass.
 7. No production deployment or main branch merge without review.
 
-## Decisions needed before implementation
-- Confirm production deployment linkage and existing folder structure.
-- Confirm approved service catalog and sales notification recipient.
-- Select isolated lead datastore and OpenAI project/budget.
-- Approve privacy and retention copy.
+## Decisions still needed before launch
+- Confirm the correct Vercel project/repository linkage before creating a Preview deployment.
+- Add the OpenAI project key, exact model, monthly budget, and billing alert.
+- Apply the `leads` migration to the isolated `ketcode-leads` project and add its server-only URL and secret key to Preview.
+- Select an email sending mechanism for notifications to `info@ketcode.com`.
+- Approve the privacy notice and lead/conversation retention period.
+- Replace the in-memory limiter with a shared server-side limiter for public traffic.
