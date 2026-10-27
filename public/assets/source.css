@@ -59,23 +59,6 @@
 .chat-message time{color:#475569}
 .chat-reply,.chat-confirmed{color:#064e3b}
 
-/* Automation & AI section */
-.ai-section{background:var(--color-bg);border-block:1px solid var(--color-line)}
-.ai-heading{max-width:52rem;margin-bottom:3rem}
-.ai-heading h2{font-size:clamp(2rem,4.6vw,3.5rem);line-height:1.2;font-weight:800;margin:1.2rem 0 1.2rem}
-.ai-heading h2 span{color:var(--color-brand-dark)}
-.ai-heading p{color:var(--color-muted);font-size:1.12rem;line-height:1.95;max-width:46rem}
-.ai-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
-.ai-card{border:1px solid var(--color-line);border-radius:var(--radius-md);background:var(--color-surface);padding:1.6rem;transition:transform .25s ease,border-color .25s ease}
-.ai-card:hover{transform:translateY(-3px);border-color:var(--color-brand)}
-.ai-icon{width:2.6rem;height:2.6rem;padding:.6rem;border-radius:.8rem;background:var(--color-mint-soft);color:var(--color-brand-dark);fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.ai-card h3{font-size:1.12rem;font-weight:700;margin:1rem 0 .45rem}
-.ai-card p{color:var(--color-muted);font-size:.97rem;line-height:1.85;margin:0}
-.ai-note{color:var(--color-muted);font-size:.9rem;margin:1.6rem 0 0;text-align:center}
-.ai-cta{margin-top:1.4rem;display:flex;justify-content:center}
-@media (max-width:900px){.ai-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:600px){.ai-grid{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){.ai-card{transition:none}.ai-card:hover{transform:none}}
 
 /* Name equation: marKETing + CODE = KetCode, animated once when it scrolls into view.
    Base rules are the final, readable state; motion only runs when site.js marks it ready. */

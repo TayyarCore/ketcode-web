@@ -2,7 +2,7 @@
   const copy = {
     ar: {
       title: 'مساعد KetCode', subtitle: 'لنحدد احتياج موقعك', open: 'تحدث معنا', close: 'إغلاق',
-      status: 'مساعد ذكاء اصطناعي', welcome: 'أهلًا بك! 👋 هل تريد تصميم موقع جديد أم تطوير موقع حالي؟',
+      status: 'مساعد تصميم المواقع', welcome: 'أهلًا بك! 👋 هل تريد تصميم موقع جديد أم تطوير موقع حالي؟',
       choices: ['تصميم موقع جديد', 'تطوير موقع حالي', 'أريد استشارة عن موقعي'], placeholder: 'اكتب رسالتك هنا...',
       send: 'إرسال', sending: 'جارٍ التفكير...', followUp: 'طلب متابعة بشرية', followUpTitle: 'بيانات التواصل',
       name: 'الاسم', contactMethod: 'طريقة التواصل', email: 'البريد الإلكتروني', phone: 'اتصال هاتفي',
@@ -11,11 +11,11 @@
       saving: 'جارٍ الحفظ...', cancel: 'إلغاء', leadSaved: 'تم استلام طلبك. سيتواصل معك فريق KetCode بعد مراجعة الاحتياج.',
       turnLimit: 'وصلت المحادثة إلى الحد المسموح. يمكنك طلب متابعة بشرية.',
       genericError: 'تعذر إكمال الطلب الآن. حاول مرة أخرى.',
-      notice: 'مساعد بالذكاء الاصطناعي. لا تشارك كلمات مرور أو بيانات دفع أو معلومات حساسة.'
+      notice: 'مساعد رقمي لجمع احتياج موقعك. لا تشارك كلمات مرور أو بيانات دفع أو معلومات حساسة.'
     },
     en: {
       title: 'KetCode Assistant', subtitle: "Let's define your website needs", open: 'Chat with us', close: 'Close',
-      status: 'AI assistant', welcome: 'Welcome! 👋 Do you need a new website or improvements to an existing one?',
+      status: 'Website design assistant', welcome: 'Welcome! 👋 Do you need a new website or improvements to an existing one?',
       choices: ['Design a new website', 'Improve my current website', 'I need website advice'], placeholder: 'Type your message...',
       send: 'Send', sending: 'Thinking...', followUp: 'Request human follow-up', followUpTitle: 'Contact details',
       name: 'Name', contactMethod: 'Contact method', email: 'Email', phone: 'Phone call', whatsapp: 'WhatsApp',
@@ -24,7 +24,7 @@
       leadSaved: 'Your request was received. The KetCode team will review it and contact you.',
       turnLimit: 'This chat has reached its message limit. You can request a human follow-up.',
       genericError: 'The request could not be completed. Please try again.',
-      notice: 'AI assistant. Do not share passwords, payment details, or sensitive information.'
+      notice: 'A digital assistant for your website enquiry. Do not share passwords, payment details, or sensitive information.'
     }
   };
 
