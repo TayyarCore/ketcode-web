@@ -3,6 +3,42 @@
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
 
+const THEME_STORAGE_KEY = 'ketcode-theme';
+const supportsThemeChoice = !location.pathname.startsWith('/templates/');
+let themeToggle = null;
+
+function themeLabel(theme) {
+  const isArabic = document.documentElement.lang === 'ar';
+  if (theme === 'dark') return isArabic ? 'تفعيل الوضع الفاتح' : 'Use light mode';
+  return isArabic ? 'تفعيل الوضع الداكن' : 'Use dark mode';
+}
+
+function updateThemeToggle() {
+  if (!themeToggle) return;
+  const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  const label = themeLabel(theme);
+  themeToggle.setAttribute('aria-label', label);
+  themeToggle.title = label;
+  themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+  themeToggle.innerHTML = theme === 'dark'
+    ? '<span aria-hidden="true">☀</span>'
+    : '<span aria-hidden="true">☾</span>';
+}
+
+function setTheme(theme, persist = true) {
+  if (!supportsThemeChoice) return;
+  const nextTheme = theme === 'dark' ? 'dark' : 'light';
+  const html = document.documentElement;
+  html.dataset.theme = nextTheme;
+  html.style.colorScheme = nextTheme;
+  document.querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', nextTheme === 'dark' ? '#0b0f14' : '#ffffff');
+  if (persist) {
+    try { localStorage.setItem(THEME_STORAGE_KEY, nextTheme); } catch {}
+  }
+  updateThemeToggle();
+}
+
 // Language toggle — each page sets data-title-en / data-title-ar on <html>
 function setLang(lang) {
   const html = document.documentElement;
@@ -21,6 +57,8 @@ function setLang(lang) {
     btn.setAttribute('aria-pressed', String(lang === l));
   });
 
+  updateThemeToggle();
+
   try { localStorage.setItem('ketcode-lang', lang); } catch {}
 }
 
@@ -29,6 +67,20 @@ try { savedLang = localStorage.getItem('ketcode-lang'); } catch {}
 const lockedArabicTemplate = location.pathname.startsWith('/templates/');
 setLang((lockedArabicTemplate ? 'ar' : savedLang) || document.documentElement.dataset.defaultLang ||
   (navigator.language?.startsWith('ar') ? 'ar' : 'en'));
+
+if (supportsThemeChoice) {
+  const themeControls = document.querySelector('.nav-actions, .p2-lang');
+  if (themeControls) {
+    themeToggle = document.createElement('button');
+    themeToggle.type = 'button';
+    themeToggle.className = 'theme-toggle';
+    themeToggle.addEventListener('click', () => {
+      setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+    themeControls.appendChild(themeToggle);
+    setTheme(document.documentElement.dataset.theme, false);
+  }
+}
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (!reduceMotion) document.documentElement.classList.add('motion-ready');

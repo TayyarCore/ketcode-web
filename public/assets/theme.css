@@ -1,0 +1,169 @@
+:root {
+  color-scheme: light dark;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  color: var(--color-brand-dark);
+  background: var(--color-surface);
+}
+
+.theme-toggle[aria-pressed="true"] {
+  color: var(--color-brand-ink);
+  background: var(--color-brand);
+}
+
+html[data-theme="dark"] {
+  --color-bg: #0b0f14;
+  --color-surface: #111827;
+  --color-mint-soft: #0d2927;
+  --color-ink: #f8fafc;
+  --color-muted: #cbd5e1;
+  --color-brand-dark: #5eead4;
+  --color-line: #334155;
+  --shadow-soft: 0 24px 80px rgba(0, 0, 0, .38);
+  --shadow-brand: 0 14px 38px rgba(45, 212, 191, .2);
+}
+
+html[data-theme="dark"] body {
+  background: var(--color-bg);
+}
+
+html[data-theme="dark"] .site-header,
+html[data-theme="dark"] .p2-header {
+  border-color: rgba(51, 65, 85, .88);
+  background: rgba(11, 15, 20, .88);
+}
+
+html[data-theme="dark"] .grid-surface {
+  background-color: var(--color-bg);
+  background-image: linear-gradient(rgba(45, 212, 191, .07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, .07) 1px, transparent 1px);
+}
+
+html[data-theme="dark"] .hero::after {
+  background: linear-gradient(transparent, var(--color-bg));
+}
+
+html[data-theme="dark"] .button-secondary,
+html[data-theme="dark"] .signal-card,
+html[data-theme="dark"] .industry-card:not(.industry-featured),
+html[data-theme="dark"] .template-card,
+html[data-theme="dark"] .madinah-section,
+html[data-theme="dark"] .footer {
+  background: #111827;
+}
+
+html[data-theme="dark"] .signal-card {
+  border-color: rgba(51, 65, 85, .9);
+}
+
+html[data-theme="dark"] .tayyar-section,
+html[data-theme="dark"] .contact-section,
+html[data-theme="dark"] .price-card,
+html[data-theme="dark"] .p2-cta {
+  background: #070b10;
+}
+
+html[data-theme="dark"] .button-light {
+  color: #0b0f14;
+  background: #fff;
+}
+
+html[data-theme="dark"] .service-chat,
+html[data-theme="dark"] .chat-body {
+  border-color: #334155;
+  background-color: #13211f;
+}
+
+html[data-theme="dark"] .chat-customer,
+html[data-theme="dark"] .chat-caption {
+  background: #1e293b;
+}
+
+html[data-theme="dark"] .p2-hero {
+  background: linear-gradient(145deg, #0b0f14 30%, #0d2927);
+}
+
+html[data-theme="dark"] .p2-hero::before {
+  background-image: linear-gradient(rgba(45, 212, 191, .08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 212, 191, .08) 1px, transparent 1px);
+}
+
+html[data-theme="dark"] .p2-button-outline,
+html[data-theme="dark"] .proof-card,
+html[data-theme="dark"] .benefit-card,
+html[data-theme="dark"] .includes-card,
+html[data-theme="dark"] .gallery-frame {
+  background: #111827;
+}
+
+html[data-theme="dark"] .device {
+  border-color: #475569;
+  background: #fff;
+}
+
+html[data-theme="dark"] .process-step::before {
+  border-color: var(--color-bg);
+}
+
+html[data-theme="dark"] .kc-chat-root {
+  --kc-chat-ink: #f8fafc;
+  --kc-chat-muted: #cbd5e1;
+  --kc-chat-teal-dark: #5eead4;
+  --kc-chat-border: #334155;
+}
+
+html[data-theme="dark"] .kc-chat-panel,
+html[data-theme="dark"] .kc-chat-followup,
+html[data-theme="dark"] .kc-chat-compose,
+html[data-theme="dark"] .kc-chat-disclaimer,
+html[data-theme="dark"] .kc-chat-lead,
+html[data-theme="dark"] .kc-chat-message[data-role="assistant"] .kc-chat-bubble,
+html[data-theme="dark"] .kc-chat-lead input,
+html[data-theme="dark"] .kc-chat-lead select,
+html[data-theme="dark"] .kc-chat-lead-actions button {
+  background: #111827;
+}
+
+html[data-theme="dark"] .kc-chat-messages {
+  background: #0b0f14;
+}
+
+html[data-theme="dark"] .kc-chat-compose input {
+  background: #0b0f14;
+  color: var(--kc-chat-ink);
+}
+
+html[data-theme="dark"] .kc-chat-choice,
+html[data-theme="dark"] .kc-chat-success {
+  background: #0d2927;
+}
+
+html[data-theme="dark"] .kc-chat-error {
+  border-color: #9a3412;
+  background: #431407;
+  color: #fed7aa;
+}
+
+@media (max-width: 640px) {
+  .nav-actions,
+  .p2-lang {
+    flex-shrink: 0;
+  }
+}
