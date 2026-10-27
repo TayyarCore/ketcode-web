@@ -1,0 +1,43 @@
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f8fafc;
+  --color-mint-soft: #f0fdfa;
+  --color-ink: #0b0f14;
+  --color-muted: #475569;
+  --color-brand: #2dd4bf;
+  --color-brand-ink: #04201c;
+  --color-brand-dark: #0f766e;
+  --color-line: #e2e8f0;
+  --font-ar: "Alexandria", system-ui, sans-serif;
+  --font-en: "Sora", system-ui, sans-serif;
+  --space-1: .5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 4rem;
+  --space-section: clamp(5rem, 9vw, 8.5rem);
+  --radius-sm: .75rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 2rem;
+  --shadow-soft: 0 24px 80px rgba(15, 23, 42, .10);
+  --shadow-brand: 0 14px 36px rgba(45, 212, 191, .24);
+  --container: 76rem;
+}
+
+/* Template previews: a light screenshot that slowly scrolls instead of a live iframe */
+.shot {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  background-position: center top;
+  animation: shot-scroll 18s ease-in-out 1.5s infinite alternate;
+}
+:has(> .shot) { position: relative; }
+.shot:hover { animation-play-state: paused; }
+@keyframes shot-scroll { to { background-position: center bottom; } }
+@media (prefers-reduced-motion: reduce) { .shot { animation: none; } }
+
+/* The brand is light. Opt out of browser auto-darkening so colours and contrast stay as designed. */
+:root { color-scheme: only light; }

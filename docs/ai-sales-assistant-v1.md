@@ -1,6 +1,6 @@
 # Ket Code AI Sales Assistant — V1
 
-Status: Core preview implemented (not deployed)
+Status: Integrated into the current KetCode website shell for Preview review
 
 ## Goal
 Convert ketcode.com visitors into qualified leads for website design and development services through a bilingual Arabic/English conversational assistant.
@@ -15,10 +15,10 @@ Convert ketcode.com visitors into qualified leads for website design and develop
 - Email notification to sales after a qualified lead is stored. No WhatsApp dependency for V1.
 
 ## Architecture
-Use the existing Next.js app and a server-only `app/api/chat/route.ts` endpoint. Keep the OpenAI key in server environment variables only. Store lead data in a Ket Code-specific datastore; never use Tayyar production tables. No new Vercel project required by design, pending deployment verification.
+Serve the current static KetCode pages from `public/` through Next.js rewrites and keep the server-only `app/api/chat/route.ts` and `app/api/leads/route.ts` endpoints. The shared site script loads the widget only on the homepage and website-service page. Keep provider and Supabase keys in server environment variables only. Store lead data in a KetCode-specific datastore; never use Tayyar production tables.
 
 ### Confirmed V1 decisions
-- AI provider: OpenAI Responses API, with the exact model selected through the server-only `OPENAI_MODEL` variable.
+- AI provider: OpenRouter Chat Completions API, with the model selected through the server-only `OPENROUTER_MODEL` variable.
 - Approved service catalog: website design and development only.
 - Lead storage: the isolated Supabase project `ketcode-leads`, never a Tayyar database.
 - Temporary sales recipient: `info@ketcode.com`, configured through `SALES_NOTIFICATION_EMAIL` so it can be replaced with a new alias.

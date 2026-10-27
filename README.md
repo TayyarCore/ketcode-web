@@ -1,6 +1,8 @@
 # Ket Code AI Sales Assistant V1
 
-Independent Next.js preview for a bilingual Arabic/English website-design sales assistant.
+Preview integration of the current KetCode website with a bilingual Arabic/English website-design sales assistant.
+
+The current static KetCode pages live under `public/`. Next.js rewrites preserve the existing public routes while keeping `/api/chat` and `/api/leads` server-side. The chat widget is loaded from the shared `assets/site.js` only on `/` and `/websites/`; templates and legal pages are unchanged.
 
 ## Local setup
 
@@ -31,4 +33,4 @@ npm exec tsc -- --noEmit
 npm run build
 ```
 
-This repository is a standalone preview. It does not contain the full published Ket Code website and must not use Tayyar production data or credentials.
+This repository contains a snapshot of the current KetCode website for Preview review. It must not use Tayyar production data or credentials, and it must not be promoted to Production without explicit approval.
