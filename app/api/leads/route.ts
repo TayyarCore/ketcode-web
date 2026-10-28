@@ -34,14 +34,13 @@ export async function POST(request: Request) {
   try {
     const receivedAt = new Date().toISOString();
     const endpoint = new URL("/rest/v1/leads", supabaseUrl);
-    endpoint.searchParams.set("on_conflict", "session_id");
 
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         apikey: secretKey,
         "Content-Type": "application/json",
-        Prefer: "resolution=ignore-duplicates,return=minimal",
+        Prefer: "return=minimal",
       },
       body: JSON.stringify({
         language: lead.language,
@@ -58,7 +57,14 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(12_000),
     });
 
-    if (!response.ok) throw new Error(`Supabase insert failed with ${response.status}`);
+    if (!response.ok) {
+      const errorBody = (await response.json().catch(() => null)) as { code?: string } | null;
+      if (response.status === 409 && errorBody?.code === "23505") {
+        return Response.json({ saved: true, notified: false });
+      }
+
+      throw new Error(`Supabase insert failed with ${response.status}`);
+    }
 
     let notified = false;
     try {
