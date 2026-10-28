@@ -25,6 +25,8 @@ SUPABASE_SECRET_KEY=sb_secret_...
 
 Use a current secret key from the project settings, never a publishable key. The key is sent only from the server in the `apikey` header. The `leads` table has RLS enabled, grants no browser roles, and grants `INSERT` only to `service_role`. Lead rows are inserted only after the visitor checks the consent box.
 
+Lead storage is the source of truth. To send a best-effort notification after a lead is stored, configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`, `SALES_FROM_EMAIL`, and `SALES_NOTIFICATION_EMAIL` as server-only environment variables. A mail failure does not discard the stored lead.
+
 ## Checks
 
 ```bash

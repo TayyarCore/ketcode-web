@@ -26,7 +26,7 @@ Serve the current static KetCode pages from `public/` through Next.js rewrites a
 ### Current implementation boundary
 - Chat and lead endpoints, bilingual UI, explicit consent, input/output limits, moderation, and fail-closed behavior are implemented.
 - Supabase persistence is implemented with a server-only secret key and a least-privilege `leads` table migration.
-- Email delivery is not implemented because no sending service has been selected. The recipient is stored with the lead for later notification wiring.
+- Email delivery is implemented through configurable SMTP after the lead is stored. Supabase remains the source of truth, and an email failure does not discard the lead.
 - The in-memory rate limit is a lightweight first barrier. A shared server-side limiter is still required before public launch because serverless instances do not share memory.
 
 ## Security and cost

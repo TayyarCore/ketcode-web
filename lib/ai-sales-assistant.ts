@@ -27,6 +27,8 @@ export const leadRequestSchema = z.object({
   messages: z.array(chatMessageSchema).min(1).max(10),
 });
 
+export type LeadRequest = z.infer<typeof leadRequestSchema>;
+
 export function assistantInstructions(language: Language) {
   const responseLanguage = language === "ar" ? "Arabic" : "English";
 
