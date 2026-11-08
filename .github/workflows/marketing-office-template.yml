@@ -1,0 +1,22 @@
+name: Marketing-office template checks
+on:
+  pull_request:
+    paths:
+      - 'templates/marketing-office/**'
+      - '.github/workflows/marketing-office-template.yml'
+  push:
+    branches:
+      - 'feature/marketing-office-template-v1'
+    paths:
+      - 'templates/marketing-office/**'
+      - '.github/workflows/marketing-office-template.yml'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Run dependency-free preview checks
+        run: node --test templates/marketing-office/template.test.cjs
