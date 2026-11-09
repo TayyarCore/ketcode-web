@@ -6,12 +6,13 @@ const offer = {
   regularPrice: "990",
   saving: "191",
   preview: "https://ketcode-sites-ks4b57kbq-tayyar.vercel.app",
+  paymentUrl: "https://buy.stripe.com/9B65kE1drcj7e9Zciuffy00",
   whatsapp: "966544008827",
 };
 const whatsapp = "https://wa.me/" + offer.whatsapp + "?text=" + encodeURIComponent("السلام عليكم، أريد حجز عرض Ketcode للمكاتب العقارية بسعر 799 ريال. اسم المنشأة: ");
 export const metadata: Metadata = {
   title: "موقع احترافي لشركتك العقارية | عرض الجمعة البيضاء من Ketcode",
-  description: "موقع احترافي لشركات التسويق والوساطة العقارية: هوية مخصصة، خدمات واضحة، وتواصل مباشر عبر واتساب والهاتف والبريد. عرض محدود لأول 10 طلبات مؤهلة، والتجهيز خلال 72 ساعة بعد الدفع واستلام المحتوى المعتمد.",
+  description: "موقع احترافي لشركات التسويق والوساطة العقارية: هوية مخصصة، خدمات واضحة، وتواصل مباشر عبر واتساب والهاتف والبريد. عرض محدود لأول 10 عمليات دفع مكتملة، والتجهيز خلال 72 ساعة بعد الدفع واستلام المحتوى المعتمد.",
   robots: {index: false, follow: false},
   openGraph: {
     title: "موقع شركتك العقارية | عرض الجمعة البيضاء من Ketcode",
@@ -34,8 +35,8 @@ const challenges = [
 ];
 const steps = [
   {title:"اختر القالب", description:"تصفّح نموذج المكتب العقاري أو نموذج المشاريع المتعددة."},
-  {title:"أرسل بيانات المنشأة", description:"الشعار واسم المنشأة والخدمات ووسائل التواصل والمحتوى المعتمد."},
-  {title:"أكد نطاق العمل وادفع", description:"نراجع المطلوب ونرسل لك وسيلة دفع موثقة بعد تأكيد قبول الطلب."},
+  {title:"ادفع عبر Stripe", description:"ادفع 799 ريال لحجز عرض الجمعة البيضاء."},
+  {title:"أرسل بيانات الموقع", description:"شاركنا الاسم والشعار والخدمات ووسائل التواصل والمحتوى المعتمد."},
   {title:"نجهز الموقع", description:"خلال 72 ساعة بعد إتمام الدفع واستلام المحتوى المعتمد كاملًا."},
 ];
 const questions = [
@@ -47,7 +48,7 @@ const questions = [
 ];
 export default function RealEstateOfferPage() {
   return <main className={styles.page}>
-    <div className={styles.notice}>عرض الجمعة البيضاء — لأول 10 طلبات مؤهلة بعد التأكيد</div>
+    <div className={styles.notice}>عرض الجمعة البيضاء — لأول 10 عمليات دفع مكتملة</div>
     <header className={styles.header}>
       <div className={styles.wrap + " " + styles.nav}>
         <a href="/" className={styles.logo} aria-label="العودة إلى Ketcode">KET<span>CODE</span></a>
@@ -116,19 +117,19 @@ export default function RealEstateOfferPage() {
         <p className={styles.eyebrow}>عرض الجمعة البيضاء</p>
         <h2>موقع عقاري بهويتك، بسعر الجمعة البيضاء.</h2>
         <p className={styles.sectionLead}>نخصّص القالب الذي اخترته باسم منشأتك وشعارها وخدماتها ووسائل التواصل الخاصة بها.</p>
-        <p className={styles.small}>العرض لأول 10 طلبات مؤهلة، ويُؤكد التوافر ونطاق التنفيذ كتابةً قبل الدفع.</p>
+        <p className={styles.small}>العرض لأول 10 عمليات دفع مكتملة. إذا عندك سؤال عن نطاق الباقة، تواصل معنا قبل الدفع.</p>
       </div>
       <div className={styles.offerCard} aria-label="سعر عرض الجمعة البيضاء">
         <span className={styles.pill}>خصم الجمعة البيضاء</span>
         <p className={styles.regularPrice}>السعر الأساسي <del><bdi>{offer.regularPrice}</bdi> ريال</del></p>
         <div className={styles.priceRow}><strong><bdi>{offer.price}</bdi></strong><span>ريال سعودي<br/>سعر الجمعة البيضاء</span></div>
         <p className={styles.saving}>وفّر {offer.saving} ريال</p>
-        <p className={styles.priceInfo}>يشمل السعر ما ينطبق من رسوم وضرائب على الباقة نفسها. لا تُضاف رسوم أخرى إلا بعد موافقتك على خدمات مستقلة.</p>
+        <p className={styles.priceInfo}>تدفع 799 ريال للباقة عبر Stripe. تُسعّر الخدمات الإضافية بشكل مستقل بعد الاتفاق عليها.</p>
         <div className={styles.rule}/>
         <div className={styles.offerLine}><strong>72 ساعة</strong><span>بعد الدفع واستلام المحتوى المعتمد</span></div>
         <div className={styles.offerLine}><strong>قالب مخصص</strong><span>بهوية منشأتك ووسائل تواصلها</span></div>
-        <a className={styles.primary} href={whatsapp} target="_blank" rel="noopener noreferrer">اطلب عرض الجمعة البيضاء <span aria-hidden="true">↗</span></a>
-        <p className={styles.small}>الطلب عبر واتساب؛ لا يتم تحصيل أي مبلغ هنا.</p>
+        <a className={styles.primary} href={offer.paymentUrl} target="_blank" rel="noopener noreferrer">ادفع 799 ريال عبر Stripe <span aria-hidden="true">↗</span></a>
+        <p className={styles.small}>ينقلك الزر إلى صفحة الدفع المستضافة لدى Stripe.</p>
       </div>
     </div></section>
     <section id="steps" className={styles.section}><div className={styles.wrap}>
@@ -144,9 +145,9 @@ export default function RealEstateOfferPage() {
       {questions.map(item=><details key={item.q} className={styles.faq}><summary>{item.q}</summary><p>{item.a}</p></details>)}
     </div></section>
     <section className={styles.cta}><div className={styles.wrap}>
-      <p className={styles.eyebrow}>جاهز لموقع منشأتك؟</p><h2>المعاينة أمامك. هل حان وقت موقع شركتك؟</h2><p>السعر الأساسي 990 ريال، وعرض الجمعة البيضاء 799 ريال للباقة نفسها. سنؤكد لك نطاق التنفيذ وطريقة الدفع قبل البدء.</p>
-      <a className={styles.primary} href={whatsapp} rel="noopener noreferrer" target="_blank">تحدث مع Ketcode لطلب العرض <span aria-hidden="true">↗</span></a>
-      <p className={styles.small}>هذا زر طلب ومحادثة، وليس دفعًا أو حجزًا مؤكدًا. لا تُدخل بيانات بطاقتك عبر واتساب.</p>
+      <p className={styles.eyebrow}>جاهز لموقع منشأتك؟</p><h2>المعاينة أمامك. هل حان وقت موقع شركتك؟</h2><p>السعر الأساسي 990 ريال، وعرض الجمعة البيضاء 799 ريال للباقة نفسها.</p>
+      <a className={styles.primary} href={offer.paymentUrl} rel="noopener noreferrer" target="_blank">ادفع 799 ريال عبر Stripe <span aria-hidden="true">↗</span></a>
+      <p className={styles.small}><a href={whatsapp} rel="noopener noreferrer" target="_blank">عندك سؤال قبل الدفع؟ تواصل معنا عبر واتساب.</a></p>
     </div></section>
     <footer className={styles.footer}><div className={styles.wrap}><strong>KET<span>CODE</span></strong><span>© 2026 Ketcode. جميع الحقوق محفوظة.</span><div><a href="/terms">الشروط</a><a href="/privacy">الخصوصية</a><a href="/refund">سياسة الاسترجاع</a></div></div></footer>
   </main>;
