@@ -10,12 +10,12 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const stages: [Project["stage"], string][] = [
-  ["received", "استلمنا طلبك"],
-  ["building", "نعمل على تجهيز موقعك"],
-  ["review", "المعاينة جاهزة للمراجعة"],
-  ["paid", "تم تأكيد الدفع"],
-  ["launched", "تم إطلاق موقعك"],
+const stages: { id: Project["stage"]; title: string; next: string }[] = [
+  { id: "received", title: "استلمنا طلبك", next: "سجّل اسمك أو اسم منشأتك وبريدك الإلكتروني، واختر القالب. احتفظ برمز الدخول للرجوع إلى مشروعك." },
+  { id: "building", title: "نعمل على تجهيز موقعك", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المشاريع، جهّز اسم كل مشروع ونبذة عنه وصوره." },
+  { id: "review", title: "المعاينة جاهزة للمراجعة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
+  { id: "paid", title: "تم تأكيد الدفع", next: "يظهر زر دفع 799 ريال بعد اعتماد المعاينة. بعد تأكيد الدفع، شاركنا اسم النطاق إذا كان عندك نطاق ترغب بربطه." },
+  { id: "launched", title: "تم إطلاق موقعك", next: "افتح رابط موقعك النهائي، وجرّب وسائل التواصل، ثم شارك الرابط مع عملائك." },
 ];
 
 const errors: Record<string, string> = {
@@ -45,7 +45,7 @@ function projectPaymentUrl(project: Project) {
 }
 
 function ProjectView({ project, code, demo }: { project: Project; code?: string; demo: boolean }) {
-  const index = stages.findIndex(([stage]) => stage === project.stage);
+  const index = stages.findIndex(({ id }) => id === project.stage);
   const preview = safePreview(project.preview_url);
   const approved = Boolean(preview && project.preview_url === project.approved_preview_url);
   const payment = approved && project.stage === "review" ? projectPaymentUrl(project) : undefined;
@@ -55,10 +55,15 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
       <p className={styles.kicker}>{demo ? "معاينة ببيانات تجريبية" : "صفحة مشروعك"}</p>
       <h1>{project.name}</h1>
       <p>{project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
+      <h2>المطلوب منك في كل مرحلة</h2>
       <ol className={styles.steps}>
-        {stages.map(([stage, label], i) => (
-          <li key={stage} aria-current={i === index ? "step" : undefined} data-reached={i <= index}>
-            <span>{i + 1}</span>{label}
+        {stages.map(({ id, title, next }, i) => (
+          <li key={id} aria-current={i === index ? "step" : undefined} data-reached={i <= index}>
+            <span aria-hidden="true">{i + 1}</span>
+            <div>
+              <strong>{title}</strong>
+              <p>{id === "review" && approved && project.stage === "review" ? "اعتمدت المعاينة. تابع إلى الدفع عند ظهور الزر." : next}</p>
+            </div>
           </li>
         ))}
       </ol>
