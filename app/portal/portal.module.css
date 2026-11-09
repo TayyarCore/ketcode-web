@@ -1,0 +1,27 @@
+.page { min-height: 100vh; background: #f2f7f5; color: #16343b; color-scheme: light; line-height: 1.8; }
+.wrap { width: min(100% - 32px, 740px); margin-inline: auto; padding-block: 28px 54px; }
+.wrap header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+.wrap header a, .card a:not(.button) { color: #075a59; font-weight: 700; }
+.card { background: white; border: 1px solid #d8e6e0; border-radius: 24px; padding: clamp(20px, 5vw, 42px); margin-bottom: 16px; }
+.card h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.3; margin: 6px 0 12px; font-weight: 800; }
+.card h2 { font-size: 24px; font-weight: 700; }
+.kicker { color: #087269; font-weight: 700; }
+.form { display: grid; gap: 16px; margin-top: 24px; }
+.form label { display: grid; gap: 5px; }
+.form input:not([type=checkbox]), .form select { min-height: 44px; padding: 8px 12px; border-radius: 8px; border: 1px solid #829a96; width: 100%; }
+.form .check { display: block; }
+.check input { margin-inline-end: 7px; }
+.button { display: inline-block; justify-self: start; border-radius: 10px; padding: 10px 16px; background: #087269; color: white; font-weight: 700; }
+.secondary { color: #075a59; text-decoration: underline; margin-top: 16px; }
+.error { border: 1px solid #b55d48; background: #fff5ed; padding: 10px 16px; margin-bottom: 16px; border-radius: 10px; }
+.steps { display: grid; gap: 10px; margin-block: 26px; padding: 0; list-style: none; }
+.steps li { display: flex; gap: 10px; align-items: center; color: #516967; }
+.steps span { display: grid; place-items: center; min-width: 32px; min-height: 32px; border-radius: 50%; background: #edf2f0; }
+.steps [data-reached=true] span { background: #d3eee5; color: #075a59; }
+.steps [aria-current=step] { font-weight: 800; color: #075a59; }
+.actions { display: grid; gap: 12px; justify-items: start; margin-bottom: 16px; }
+.code { display: block; overflow-wrap: anywhere; padding: 10px; background: #edf2f0; }
+
+.materials { border-block-start: 1px solid #d8e6e0; padding-block: 18px; }
+.materials textarea { width: 100%; border: 1px solid #829a96; border-radius: 8px; padding: 8px 12px; }
+.materials small { color: #516967; }
