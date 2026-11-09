@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requirePortalEmail } from "../../lib/factory/auth";
 import { cookies } from "next/headers";
 import { findProject, newAccessCode, portalCookie, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
 import { acceptPreview, closeProject, openProject, registerProject, saveMaterials } from "./actions";
@@ -19,8 +20,8 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 ];
 
 const errors: Record<string, string> = {
-  registration: "راجع الاسم والبريد والقالب والموافقة، ثم أعد المحاولة.",
-  access: "رمز الدخول غير صحيح. راجع الرمز المحفوظ.",
+  registration: "راجع الاسم والقالب والموافقة، ثم أعد المحاولة.",
+  access: "تعذّر فتح المشروع. تحقق من الرمز ومن بريدك المسجّل للمشروع.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
   references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
   logo: "اختر صورة PNG أو JPG أو WebP بحجم لا يتجاوز 512 كيلوبايت.",
@@ -125,8 +126,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const enabled = portalEnabled();
   const canDemo = process.env.VERCEL_ENV === "preview";
   const demo = canDemo && params.demo === "1";
-  const code = enabled && !demo ? (await cookies()).get(portalCookie)?.value : undefined;
-  const project = demo ? sample : await findProject(code).catch(() => null);
+  const email = enabled && !demo ? await requirePortalEmail() : undefined;
+  const code = email ? (await cookies()).get(portalCookie)?.value : undefined;
+  const project = demo ? sample : email ? await findProject(email, code).catch(() => null) : undefined;
   const error = project === null ? errors.unavailable : Object.hasOwn(errors, params.error ?? "") ? errors[params.error ?? ""] : undefined;
 
   return (
@@ -135,6 +137,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
         {error && <p className={styles.error} role="alert">{error}</p>}
         {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
+        {email && !project && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
         {project ? <ProjectView project={project} code={code} demo={demo} /> : (
           <>
             <section className={styles.card}>
@@ -145,7 +148,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <form className={styles.form} action={registerProject}>
                   <input type="hidden" name="code" value={newAccessCode()} />
                   <label>اسمك أو اسم المنشأة<input name="name" autoComplete="name" maxLength={100} required /></label>
-                  <label>البريد الإلكتروني<input name="email" type="email" autoComplete="email" maxLength={254} required dir="ltr" /></label>
+                  <p>البريد المسجّل <bdi>{email}</bdi></p>
                   <label>القالب<select name="template"><option value="office">قالب المكتب العقاري</option><option value="projects">قالب المشاريع المتعددة</option></select></label>
                   <label className={styles.check}><input type="checkbox" name="consent" required /> أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</label>
                   <button className={styles.button} type="submit">سجّل وافتح صفحة مشروعك</button>

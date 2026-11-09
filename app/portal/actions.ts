@@ -3,13 +3,13 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requirePortalEmail, signOut } from "../../lib/factory/auth";
 import { isRateLimited } from "../../lib/rate-limit";
 import { accessPattern, approveProject, createProject, findProject, portalCookie, portalEnabled, updateMaterials } from "../../lib/factory/portal";
 
 const registration = z.object({
   code: z.string().regex(accessPattern),
   name: z.string().trim().min(2).max(100),
-  email: z.email().max(254),
   template: z.enum(["office", "projects"]),
   consent: z.literal("on"),
 });
@@ -30,10 +30,11 @@ async function saveSession(code: string) {
 }
 
 export async function registerProject(form: FormData) {
+  const email = await requirePortalEmail();
   if (!portalEnabled() || await limited("register")) redirect("/portal?error=unavailable");
   const parsed = registration.safeParse(Object.fromEntries(form));
   if (!parsed.success) redirect("/portal?error=registration");
-  const { code, name, email, template } = parsed.data;
+  const { code, name, template } = parsed.data;
   try {
     if (!await createProject(code, name, email, template)) throw new Error("Project missing");
     await saveSession(code);
@@ -44,9 +45,10 @@ export async function registerProject(form: FormData) {
 }
 
 export async function openProject(form: FormData) {
+  const email = await requirePortalEmail();
   if (!portalEnabled() || await limited("open")) redirect("/portal?error=unavailable");
   const code = String(form.get("code") ?? "").trim();
-  const project = await findProject(code).catch(() => null);
+  const project = await findProject(email, code).catch(() => null);
   if (project === null) redirect("/portal?error=unavailable");
   if (!project) redirect("/portal?error=access");
   await saveSession(code);
@@ -54,19 +56,22 @@ export async function openProject(form: FormData) {
 }
 
 export async function acceptPreview(form: FormData) {
+  const email = await requirePortalEmail();
   if (!portalEnabled()) redirect("/portal?error=unavailable");
   const code = (await cookies()).get(portalCookie)?.value ?? "";
   const preview = String(form.get("preview") ?? "");
-  const approved = await approveProject(code, preview).catch(() => false);
+  const approved = await approveProject(email, code, preview).catch(() => false);
   redirect(approved ? "/portal" : "/portal?error=preview");
 }
 
 export async function closeProject() {
   (await cookies()).set(portalCookie, "", { path: "/portal", maxAge: 0 });
-  redirect("/portal");
+  await signOut();
+  redirect("/portal/login");
 }
 
 export async function saveMaterials(form: FormData) {
+  const email = await requirePortalEmail();
   if (!portalEnabled() || await limited("materials")) redirect("/portal?error=unavailable");
   const code = (await cookies()).get(portalCookie)?.value ?? "";
   if (!accessPattern.test(code)) redirect("/portal?error=access");
@@ -93,6 +98,6 @@ export async function saveMaterials(form: FormData) {
     logo = { name: file.name.slice(0, 120), data: bytes.toString("base64") };
   }
 
-  const saved = await updateMaterials(code, urls.filter((url): url is string => Boolean(url)), logo).catch(() => false);
+  const saved = await updateMaterials(email, code, urls.filter((url): url is string => Boolean(url)), logo).catch(() => false);
   redirect(saved ? "/portal?saved=materials" : "/portal?error=materials");
 }
