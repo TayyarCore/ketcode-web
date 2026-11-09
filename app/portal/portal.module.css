@@ -21,3 +21,7 @@
 .steps [aria-current=step] { font-weight: 800; color: #075a59; }
 .actions { display: grid; gap: 12px; justify-items: start; margin-bottom: 16px; }
 .code { display: block; overflow-wrap: anywhere; padding: 10px; background: #edf2f0; }
+
+.materials { border-block-start: 1px solid #d8e6e0; padding-block: 18px; }
+.materials textarea { width: 100%; border: 1px solid #829a96; border-radius: 8px; padding: 8px 12px; }
+.materials small { color: #516967; }

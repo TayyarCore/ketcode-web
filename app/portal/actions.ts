@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { isRateLimited } from "../../lib/rate-limit";
-import { accessPattern, approveProject, createProject, findProject, portalCookie, portalEnabled } from "../../lib/factory/portal";
+import { accessPattern, approveProject, createProject, findProject, portalCookie, portalEnabled, updateMaterials } from "../../lib/factory/portal";
 
 const registration = z.object({
   code: z.string().regex(accessPattern),
@@ -64,4 +64,35 @@ export async function acceptPreview(form: FormData) {
 export async function closeProject() {
   (await cookies()).set(portalCookie, "", { path: "/portal", maxAge: 0 });
   redirect("/portal");
+}
+
+export async function saveMaterials(form: FormData) {
+  if (!portalEnabled() || await limited("materials")) redirect("/portal?error=unavailable");
+  const code = (await cookies()).get(portalCookie)?.value ?? "";
+  if (!accessPattern.test(code)) redirect("/portal?error=access");
+  const values = String(form.get("references") ?? "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const urls = values.map((value) => {
+    try {
+      const url = new URL(value);
+      if ((url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password && url.href.length <= 300) return url.href;
+    } catch {
+      return undefined;
+    }
+  });
+  if (urls.length > 5 || urls.some((url) => !url)) redirect("/portal?error=references");
+
+  const file = form.get("logo");
+  let logo: { name: string; data: string } | undefined;
+  if (file instanceof File && file.size > 0) {
+    if (file.size > 512 * 1024) redirect("/portal?error=logo");
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const png = bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+    const jpeg = bytes.subarray(0, 3).equals(Buffer.from([255, 216, 255]));
+    const webp = bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP";
+    if (!png && !jpeg && !webp) redirect("/portal?error=logo");
+    logo = { name: file.name.slice(0, 120), data: bytes.toString("base64") };
+  }
+
+  const saved = await updateMaterials(code, urls.filter((url): url is string => Boolean(url)), logo).catch(() => false);
+  redirect(saved ? "/portal?saved=materials" : "/portal?error=materials");
 }

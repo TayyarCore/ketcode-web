@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { findProject, newAccessCode, portalCookie, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
-import { acceptPreview, closeProject, openProject, registerProject } from "./actions";
+import { acceptPreview, closeProject, openProject, registerProject, saveMaterials } from "./actions";
 import styles from "./portal.module.css";
 
 export const metadata: Metadata = {
@@ -22,6 +22,9 @@ const errors: Record<string, string> = {
   registration: "راجع الاسم والبريد والقالب والموافقة، ثم أعد المحاولة.",
   access: "رمز الدخول غير صحيح. راجع الرمز المحفوظ.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
+  references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
+  logo: "اختر صورة PNG أو JPG أو WebP بحجم لا يتجاوز 512 كيلوبايت.",
+  materials: "تعذّر حفظ مواد الموقع. حاول مجددًا إذا كان مشروعك في مرحلة التجهيز.",
   unavailable: "تعذّرت متابعة الطلب الآن. حاول مرة أخرى بعد قليل.",
 };
 
@@ -32,6 +35,8 @@ const sample: Project = {
   stage: "building",
   preview_url: null,
   approved_preview_url: null,
+  reference_urls: [],
+  logo_name: null,
 };
 
 function projectPaymentUrl(project: Project) {
@@ -48,6 +53,7 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
   const index = stages.findIndex(({ id }) => id === project.stage);
   const preview = safePreview(project.preview_url);
   const approved = Boolean(preview && project.preview_url === project.approved_preview_url);
+  const canEditMaterials = project.stage === "received" || project.stage === "building";
   const payment = approved && project.stage === "review" ? projectPaymentUrl(project) : undefined;
 
   return (
@@ -67,6 +73,27 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
           </li>
         ))}
       </ol>
+      {canEditMaterials && (
+        <section className={styles.materials}>
+          <h2>مواد تجهيز موقعك</h2>
+          <form className={styles.form} action={demo ? undefined : saveMaterials}>
+            <label>
+              روابط مواقع أعجبتني (اختياري)
+              <textarea name="references" disabled={demo} dir="ltr" rows={3} maxLength={1600}
+                placeholder="https://example.com" defaultValue={project.reference_urls.join("\n")} />
+              <small>أضف حتى 5 روابط، كل رابط في سطر مستقل.</small>
+            </label>
+            <label>
+              رفع الشعار (اختياري)
+              <input name="logo" type="file" disabled={demo} accept="image/png,image/jpeg,image/webp" />
+              <small>PNG أو JPG أو WebP، حتى 512 كيلوبايت.</small>
+            </label>
+            {project.logo_name && <p>الشعار المحفوظ <bdi>{project.logo_name}</bdi></p>}
+            {demo ? <p>هذه معاينة لشكل الحقول. الحفظ متاح بعد تفعيل التسجيل.</p> :
+              <button className={styles.button} type="submit">احفظ مواد الموقع</button>}
+          </form>
+        </section>
+      )}
       {preview && (
         <div className={styles.actions}>
           <a className={styles.button} href={preview} target="_blank" rel="noopener noreferrer">افتح معاينة موقعك ↗</a>
@@ -93,7 +120,7 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
   );
 }
 
-export default async function PortalPage({ searchParams }: { searchParams: Promise<{ error?: string; demo?: string }> }) {
+export default async function PortalPage({ searchParams }: { searchParams: Promise<{ error?: string; demo?: string; saved?: string }> }) {
   const params = await searchParams;
   const enabled = portalEnabled();
   const canDemo = process.env.VERCEL_ENV === "preview";
@@ -107,6 +134,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       <div className={styles.wrap}>
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
         {error && <p className={styles.error} role="alert">{error}</p>}
+        {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
         {project ? <ProjectView project={project} code={code} demo={demo} /> : (
           <>
             <section className={styles.card}>

@@ -17,3 +17,10 @@ create table public.white_friday_projects (
 alter table public.white_friday_projects enable row level security;
 revoke all on public.white_friday_projects from public, anon, authenticated;
 grant select, insert, update on public.white_friday_projects to service_role;
+
+-- Materials are private; never include logo_data in public responses.
+alter table public.white_friday_projects
+  add column reference_urls text[] not null default '{}' check (cardinality(reference_urls) <= 5),
+  add column logo_name text check (char_length(logo_name) <= 120),
+  add column logo_data text check (char_length(logo_data) <= 699052),
+  add check ((logo_name is null) = (logo_data is null));

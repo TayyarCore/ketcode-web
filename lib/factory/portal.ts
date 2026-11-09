@@ -10,6 +10,8 @@ export type Project = {
   stage: "received" | "building" | "review" | "paid" | "launched";
   preview_url: string | null;
   approved_preview_url: string | null;
+  reference_urls: string[];
+  logo_name: string | null;
 };
 
 export function portalEnabled() {
@@ -50,7 +52,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as Project[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name";
 
 export async function findProject(code?: string) {
   if (!code || !accessPattern.test(code)) return undefined;
@@ -83,4 +85,15 @@ export async function approveProject(code: string, preview: string) {
   query.set("preview_url", "eq." + preview);
   query.set("select", "id");
   return (await database(query, "PATCH", { approved_preview_url: preview })).length === 1;
+}
+
+export async function updateMaterials(code: string, referenceUrls: string[], logo?: { name: string; data: string }) {
+  if (!accessPattern.test(code)) return false;
+  const query = accessQuery(code);
+  query.set("stage", "in.(received,building)");
+  query.set("select", "id");
+  return (await database(query, "PATCH", {
+    reference_urls: referenceUrls,
+    ...(logo && { logo_name: logo.name, logo_data: logo.data }),
+  })).length === 1;
 }
