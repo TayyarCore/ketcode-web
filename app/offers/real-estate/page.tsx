@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 const benefits = [
   {number:"01", title:"هوية باسم منشأتك", description:"اسم شركتك وشعارها وألوانها ومحتواها بدل الهوية التجريبية."},
-  {number:"02", title:"خدماتك في واجهة واضحة", description:"صفحة عربية تعرض خدمات التسويق والوساطة والعقارات التي تعمل عليها منشأتك بوصفها، لا نظام إدارة عقارات."},
+  {number:"02", title:"خدماتك ومشاريعك في رابط واحد", description:"اعرض خدمات مكتبك أو قدّم مشاريعك بصفحات تعريفية فيها صور ونبذة وطريقة للاستفسار."},
   {number:"03", title:"تواصل بنقرة واحدة", description:"ربط رقم واتساب المنشأة وهاتفها وبريدها الإلكتروني بعد التحقق منها."},
   {number:"04", title:"متوافق مع الجوال", description:"تصميم عربي باتجاه صحيح مع عرض متجاوب للهاتف والكمبيوتر."},
 ];
@@ -33,16 +33,16 @@ const challenges = [
   {number:"03", title:"رابط واحد يختصر الخطوات", description:"مكان مرتب للتعريف بالشركة، وعرض خدماتها، وتوجيه العميل إلى وسيلة التواصل المناسبة."},
 ];
 const steps = [
-  {title:"شاهد المعاينة", description:"افتح النموذج الحالي لتعرف شكل موقعك قبل الطلب."},
+  {title:"اختر القالب", description:"تصفّح نموذج المكتب العقاري أو نموذج المشاريع المتعددة."},
   {title:"أرسل بيانات المنشأة", description:"الشعار واسم المنشأة والخدمات ووسائل التواصل والمحتوى المعتمد."},
   {title:"أكد نطاق العمل وادفع", description:"نراجع المطلوب ونرسل لك وسيلة دفع موثقة بعد تأكيد قبول الطلب."},
   {title:"نجهز الموقع", description:"خلال 72 ساعة بعد إتمام الدفع واستلام المحتوى المعتمد كاملًا."},
 ];
 const questions = [
-  {q:"هل يمكن عرض العقارات المتاحة؟", a:"هذه الباقة تعرض معلومات الشركة وخدماتها. قوائم العقارات الحية وتحديث حالة الحجوزات وربط تيار ليست مشمولة؛ يمكن بحثها كخدمة مستقلة لاحقًا."},
+  {q:"كيف تظهر المشاريع على الموقع؟", a:"يعرض قالب المشاريع صورًا ونبذة وموقعًا لكل مشروع باستخدام المحتوى المتفق عليه. قوائم الوحدات الحية والحجوزات وربط تيار خارج نطاق الباقة."},
   {q:"هل الموقع يتضمن لوحة إدارة عقارات؟", a:"لا. الموقع واجهة تعريف وتسويق وتواصل، وليس نظام CRM أو إدارة وحدات أو عقود."},
   {q:"متى تبدأ الـ 72 ساعة؟", a:"بعد تأكيد نطاق الطلب واستلام الدفعة والمحتوى المعتمد المطلوب، وليس من وقت إرسال أول استفسار."},
-  {q:"هل أستطيع طلب تصميم مختلف بالكامل؟", a:"عرض 799 ريال مخصص لتخصيص القالب المعروض، ولا يشمل تصميمًا مخصصًا من الصفر أو مزايا برمجية إضافية."},
+  {q:"هل أستطيع طلب تصميم مختلف بالكامل؟", a:"عرض 799 ريال يشمل تخصيص أحد القالبين المعروضين، ولا يشمل تصميمًا مخصصًا من الصفر أو مزايا برمجية إضافية."},
   {q:"هل يشمل النطاق والاستضافة والتجديد؟", a:"يُحدَّد ما يخص النطاق والاستضافة والتجديد في عرض الطلب المكتوب قبل الدفع، ولا يفترض شمول خدمات لم تُتفق عليها."},
 ];
 export default function RealEstateOfferPage() {
@@ -59,13 +59,13 @@ export default function RealEstateOfferPage() {
       <div className={styles.wrap + " " + styles.heroGrid}>
         <div>
           <p className={styles.eyebrow}>مخصص لشركات التسويق والوساطة العقارية</p>
-          <h1>عميلك يريد أن يعرفك. <span>ماذا يجد عندما يبحث عن شركتك؟</span></h1>
-          <p className={styles.subtitle}>قد تكون خدماتك ممتازة، لكن العميل الجديد لا يعرف ذلك بعد. امنحه مكانًا واحدًا يرى فيه هويتك وخدماتك ويعرف كيف يصل إليك قبل أن يقرر التواصل.</p>
+          <h1>عملاء أكثر.<span>بتقنية تعمل لك.</span></h1>
+          <p className={styles.subtitle}>موقع باسم منشأتك العقارية يجمع خدماتك ومشاريعك وطرق التواصل في رابط واحد. شاركه مع عملائك، وخَلّ الاستفسار عن خدماتك أو مشاريعك أسهل.</p>
           <div className={styles.heroActions}>
-            <a className={styles.primary} href={offer.preview} target="_blank" rel="noopener noreferrer">شاهد شكل موقعك القادم <span aria-hidden="true">↗</span></a>
+            <a className={styles.primary} href="#templates">شاهد القوالب <span aria-hidden="true">↓</span></a>
             <a className={styles.secondary} href="#problem">لماذا تحتاجه؟ <span aria-hidden="true">↓</span></a>
           </div>
-          <p className={styles.small}>نموذج المعاينة تجريبي، ولا يستقبل طلبات العملاء. نخصّص وسائل التواصل عند إعداد موقعك.</p>
+          <p className={styles.small}>تصفّح النموذج قبل الطلب. نخصّص القالب باسم منشأتك ووسائل تواصلها.</p>
         </div>
         <div className={styles.offerCard} aria-label="صورة نجاح العميل">
           <span className={styles.pill}>الانطباع الأول يبدأ من هنا</span>
@@ -75,14 +75,14 @@ export default function RealEstateOfferPage() {
           <div className={styles.offerLine}><strong>هوية واضحة</strong><span>اسم وشعار وخدمات منشأتك</span></div>
           <div className={styles.offerLine}><strong>تواصل مباشر</strong><span>واتساب وهاتف وبريد الشركة</span></div>
           <div className={styles.offerLine}><strong>واجهة عربية</strong><span>مهيأة للجوال والكمبيوتر</span></div>
-          <a href={offer.preview} className={styles.previewLink} target="_blank" rel="noopener noreferrer">اكتشف النموذج بنفسك <span aria-hidden="true">↗</span></a>
+          <a href="#templates" className={styles.previewLink}>اختر النموذج الأقرب لنشاطك <span aria-hidden="true">↓</span></a>
         </div>
       </div>
     </section>
     <section id="problem" className={styles.section}><div className={styles.wrap}>
       <p className={styles.eyebrow}>انظر إلى التجربة بعين العميل</p>
       <h2>قبل أن يتواصل معك، يحتاج سببًا ليثق بك.</h2>
-      <p className={styles.sectionLead}>لا نعدك بعدد محدد من العملاء. نساعدك على تقديم معلومات شركتك في مكان واحد يسهل فهمه ومشاركته.</p>
+      <p className={styles.sectionLead}>حين يسأل العميل عن خدماتك أو أحد مشاريعك، أرسل له رابطًا يجيب عن أسئلته ويتيح له التواصل معك مباشرة.</p>
       <div className={styles.benefitGrid}>{challenges.map(item=><article key={item.number} className={styles.benefit}><span>{item.number}</span><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
     </div></section>
     <section id="included" className={styles.section}><div className={styles.wrap}>
@@ -90,22 +90,39 @@ export default function RealEstateOfferPage() {
       <p className={styles.sectionLead}>موقع تعريفي وتسويقي يقدم منشأتك بثقة، دون تعقيد تقني غير مطلوب.</p>
       <div className={styles.benefitGrid}>{benefits.map(b=><article key={b.number} className={styles.benefit}><span>{b.number}</span><h3>{b.title}</h3><p>{b.description}</p></article>)}</div>
     </div></section>
-    <section className={styles.previewSection}><div className={styles.wrap + " " + styles.previewLayout}>
-      <div><p className={styles.eyebrow}>شاهد قبل أن تقرر</p><h2>هذا شكل القالب الذي سنخصصه لك.</h2><p className={styles.sectionLead}>تصفّح النموذج من جوالك أو الكمبيوتر. بعد طلبك نستبدل بيانات المنشأة التجريبية باسمك وشعارك وخدماتك.</p><a className={styles.primary} href={offer.preview} target="_blank" rel="noopener noreferrer">افتح القالب التجريبي <span aria-hidden="true">↗</span></a></div>
-      <div className={styles.mockup}><div className={styles.browserBar}><i/><i/><i/><small>Ketcode — Real Estate Office</small></div><div className={styles.mockupBody}><span>شركة عقارية</span><h3>عقارك يستحق عرضًا احترافيًا.</h3><p>وساطة وتسويق عقاري بهوية شركتك</p><div className={styles.mockupButton}>تواصل معنا</div></div></div>
-    </div></section>
+    <section id="templates" className={styles.previewSection}>
+      <div className={styles.wrap}>
+        <p className={styles.eyebrow}>شاهد قبل أن تقرر</p>
+        <h2>اختر القالب المناسب لنشاطك</h2>
+        <p className={styles.sectionLead}>نعرض لك نموذجين. نخصّص القالب الذي تختاره باسم منشأتك وشعارها ومحتواها.</p>
+        <div className={styles.templateGrid}>
+          <article className={styles.offerCard}>
+            <span className={styles.pill}>للمكاتب العقارية</span>
+            <h3>قالب المكتب العقاري</h3>
+            <p>مستوحى من موقع نواهل العقارية. يعرّف بمكتبك وخدماته ويتيح للعميل التواصل مباشرة.</p>
+            <a className={styles.primary} href={offer.preview} target="_blank" rel="noopener noreferrer">شاهد قالب المكتب <span aria-hidden="true">↗</span></a>
+          </article>
+          <article className={styles.offerCard}>
+            <span className={styles.pill}>للمطورين والمسوقين</span>
+            <h3>قالب المشاريع المتعددة</h3>
+            <p>صفحة تجمع مشاريعك، مع نبذة وتفاصيل لكل مشروع.</p>
+            <a className={styles.primary} href="/offers/real-estate/projects">شاهد قالب المشاريع <span aria-hidden="true">←</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
     <section id="offer" className={styles.section}><div className={styles.wrap + " " + styles.offerReveal}>
       <div>
-        <p className={styles.eyebrow}>عرض الجمعة البيضاء — بعد أن شاهدت ما ستحصل عليه</p>
-        <h2>موقع شركتك جاهز للانطلاق من قالب معتمد.</h2>
-        <p className={styles.sectionLead}>بدل بدء التصميم من الصفر، نخصص النموذج الذي شاهدته باسم منشأتك وشعارها وخدماتها ووسائل التواصل الخاصة بها.</p>
+        <p className={styles.eyebrow}>عرض الجمعة البيضاء</p>
+        <h2>موقع عقاري بهويتك، بسعر الجمعة البيضاء.</h2>
+        <p className={styles.sectionLead}>نخصّص القالب الذي اخترته باسم منشأتك وشعارها وخدماتها ووسائل التواصل الخاصة بها.</p>
         <p className={styles.small}>العرض لأول 10 طلبات مؤهلة، ويُؤكد التوافر ونطاق التنفيذ كتابةً قبل الدفع.</p>
       </div>
       <div className={styles.offerCard} aria-label="سعر عرض الجمعة البيضاء">
         <span className={styles.pill}>خصم الجمعة البيضاء</span>
-        <p className={styles.regularPrice}>السعر الأساسي للباقة: <del>{offer.regularPrice} ريال</del></p>
-        <div className={styles.priceRow}><strong>{offer.price}</strong><span>ريال سعودي<br/>السعر النهائي للعميل</span></div>
-        <p className={styles.saving}>توفير {offer.saving} ريال (نحو 19%)</p>
+        <p className={styles.regularPrice}>السعر الأساسي <del><bdi>{offer.regularPrice}</bdi> ريال</del></p>
+        <div className={styles.priceRow}><strong><bdi>{offer.price}</bdi></strong><span>ريال سعودي<br/>سعر الجمعة البيضاء</span></div>
+        <p className={styles.saving}>وفّر {offer.saving} ريال</p>
         <p className={styles.priceInfo}>يشمل السعر ما ينطبق من رسوم وضرائب على الباقة نفسها. لا تُضاف رسوم أخرى إلا بعد موافقتك على خدمات مستقلة.</p>
         <div className={styles.rule}/>
         <div className={styles.offerLine}><strong>72 ساعة</strong><span>بعد الدفع واستلام المحتوى المعتمد</span></div>
