@@ -25,10 +25,12 @@ a{color:inherit}
 .wrap{width:min(var(--wrap),100% - 2*var(--gutter));margin-inline:auto}
 .skip-link{position:absolute;inset-inline-start:1rem;top:-4rem;background:var(--ink);color:var(--paper);padding:.6rem 1rem;border-radius:var(--r-sm);z-index:20}
 .skip-link:focus{top:1rem}
-h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.3;margin:0;letter-spacing:0}
+h1,h2,h3{font-weight:600;line-height:1.3;margin:0;letter-spacing:0}
+h1,h2{font-family:var(--display)}
+h3{font-family:var(--body)}
 h1{font-size:clamp(2.3rem,5.4vw,4.1rem);line-height:1.22}
 h2{font-size:clamp(1.8rem,3.4vw,2.7rem)}
-h3{font-size:1.25rem}
+h3{font-size:1.15rem}
 p{margin:0}
 .lede{color:var(--muted);font-size:clamp(1.05rem,1.6vw,1.2rem);max-width:36rem}
 
@@ -188,3 +190,10 @@ html[data-theme="dark"] .frame{box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
   .fs-caret{animation:none}
   .work .shot{transition:none}
 }
+
+/* Sales assistant in the new identity */
+.kc-chat-root{--kc-chat-teal:#3A4BE0;--kc-chat-teal-dark:#3A4BE0;font-family:var(--body)}
+.kc-chat-launcher{background:#171A33;color:#fff;border-color:transparent;box-shadow:0 18px 40px -12px rgba(23,26,51,.45)}
+.kc-chat-launcher-mark{color:#171A33;font-family:var(--display)}
+.kc-chat-brand-mark{background:var(--lamp);color:var(--lamp-ink);font-family:var(--display)}
+html[data-theme="dark"] .kc-chat-launcher{background:#3A4BE0}
