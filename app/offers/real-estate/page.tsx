@@ -40,7 +40,7 @@ const challenges = [
 ];
 
 const steps = [
-  { title: "اختر القالب", text: "قالب المكتب العقاري أو قالب المشاريع المتعددة." },
+  { title: "اختر القالب", text: "قالب منشآت التسويق العقاري أو قالب المطورين العقاريين." },
   { title: "شارك بيانات منشأتك", text: "الاسم والشعار والخدمات ووسائل التواصل." },
   { title: "راجع المعاينة", text: "شاهد الموقع بهوية منشأتك وشاركنا ملاحظاتك." },
   { title: "اعتمد وادفع", text: "بعد اعتماد المعاينة يتم الدفع وننسّق معك النشر." },
@@ -107,13 +107,13 @@ export default function RealEstateOfferPage() {
       <div className={styles.sectionHead}><h2>اختر القالب المناسب لنشاطك</h2><p>نخصّص القالب الذي تختاره باسم منشأتك وشعارها ومحتواها.</p></div>
       <div className={styles.templateGrid}>
         <article className={styles.template}>
-          <div className={styles.templateTop + " " + styles.templateOffice}>قالب المكتب العقاري</div>
+          <div className={styles.templateTop + " " + styles.templateOffice}>منشآت التسويق العقاري</div>
           <div className={styles.templateBody}><p>يعرّف بمكتبك وخدماته ويتيح للعميل التواصل مباشرة.</p>
             <a className={styles.primary} href={offer.officeTemplate} target="_blank" rel="noopener noreferrer">شاهد قالب المكتب</a></div>
         </article>
         <article className={styles.template}>
-          <div className={styles.templateTop + " " + styles.templateProjects}>قالب المشاريع المتعددة</div>
-          <div className={styles.templateBody}><p>للمطورين والمسوقين: صفحة تجمع مشاريعك مع نبذة وتفاصيل لكل مشروع.</p>
+          <div className={styles.templateTop + " " + styles.templateProjects}>منشآت المطورين العقاريين</div>
+          <div className={styles.templateBody}><p>صفحة تجمع مشاريعك مع نبذة وتفاصيل لكل مشروع.</p>
             <Link className={styles.primary} href={offer.projectsTemplate}>شاهد قالب المشاريع</Link></div>
         </article>
       </div>
