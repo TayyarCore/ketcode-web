@@ -134,3 +134,9 @@
   .navAction{display:none}
 }
 @media (prefers-reduced-motion:reduce){.page *{scroll-behavior:auto}}
+
+/* Sales assistant in the new identity */
+:global(.kc-chat-root){--kc-chat-teal:#3A4BE0;--kc-chat-teal-dark:#3A4BE0;font-family:var(--body,"IBM Plex Sans Arabic"),Tahoma,sans-serif}
+:global(.kc-chat-root .kc-chat-launcher){background:#171A33;color:#fff;border-color:transparent;box-shadow:0 18px 40px -12px rgba(23,26,51,.45)}
+:global(.kc-chat-root .kc-chat-launcher-mark){color:#171A33}
+:global(.kc-chat-root .kc-chat-brand-mark){background:#F2B544;color:#3A2800}

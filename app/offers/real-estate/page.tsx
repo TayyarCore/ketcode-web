@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script";
 import styles from "./page.module.css";
 
 const offer = {
@@ -10,9 +11,7 @@ const offer = {
   projectsTemplate: "/offers/real-estate/projects",
 };
 
-const whatsapp = "https://wa.me/966544008827?text=" + encodeURIComponent(
-  "السلام عليكم، أريد حجز مكان في عرض الجمعة البيضاء لموقع مكتبي العقاري",
-);
+const portal = "/portal";
 
 export const metadata: Metadata = {
   title: "تصميم موقع عقاري لمكتبك وشركتك | 799 ريال | Ketcode",
@@ -44,12 +43,12 @@ const trust = [
   { title: "اتفاق مكتوب قبل الدفع", text: "نطاق العمل وأي خدمات إضافية أو تكاليف دورية تُوضَّح كتابةً قبل أن تلتزم بشيء." },
   { title: "موقعك ومحتواك ملكك", text: "النصوص والصور وبيانات منشأتك ملكك، ويُسجَّل النطاق باسم منشأتك." },
   { title: "جاهز لمتطلبات الإعلان العقاري", text: "يعرض الموقع رخصة فال والسجل التجاري بعد التحقق منهما، ليثق بك عميلك من أول زيارة." },
-  { title: "تتعامل مع الفريق مباشرة", text: "تواصل عبر واتساب مع من ينفّذ موقعك، دون وسطاء أو نماذج طويلة." },
+  { title: "طلبك في صفحة واحدة", text: "مراحل التنفيذ والمعاينة والاعتماد في صفحة مشروعك على بوابة العملاء، دون رسائل متفرقة." },
 ];
 
 const steps = [
   { title: "اختر القالب", text: "قالب منشآت التسويق العقاري أو قالب المطورين العقاريين." },
-  { title: "شارك بيانات منشأتك", text: "الاسم والشعار والخدمات ووسائل التواصل." },
+  { title: "سجّل طلبك", text: "ادخل البوابة ببريدك وأضف بيانات منشأتك وشعارها." },
   { title: "راجع المعاينة", text: "شاهد الموقع بهوية منشأتك وشاركنا ملاحظاتك." },
   { title: "اعتمد وادفع", text: "بعد اعتماد المعاينة يتم الدفع وننسّق معك النشر." },
 ];
@@ -59,7 +58,7 @@ const questions = [
   { q: "كيف تظهر المشاريع على الموقع؟", a: "يعرض قالب المشاريع صورًا ونبذة وموقعًا لكل مشروع باستخدام المحتوى المتفق عليه. قوائم الوحدات الحية والحجوزات وربط تيار خارج نطاق الباقة." },
   { q: "هل الموقع يتضمن لوحة إدارة عقارات؟", a: "لا. الموقع واجهة تعريف وتسويق وتواصل، وليس نظام CRM أو إدارة وحدات أو عقود." },
   { q: "هل يمكن ربط الموقع بنظام CRM؟", a: "نعم، كخدمة إضافية: نضيف إلى موقعك نموذج طلب ونربطه بنظام CRM الذي تستخدمه، فتصل طلبات العملاء إليه مباشرة بدل أن تضيع بين الرسائل. يُسعّر الربط بعد مراجعة النظام، وليس ضمن عرض 799." },
-  { q: "هل تقدمون خدمات أخرى مثل الشات بوت أو إدارة الحملات؟", a: "تركيزنا في هذا العرض على موقع منشأتك. إن كان لديك احتياج إضافي، أخبرنا عبر واتساب ونوضح لك كتابةً ما نستطيع تقديمه." },
+  { q: "هل تقدمون خدمات أخرى مثل الشات بوت أو إدارة الحملات؟", a: "تركيزنا في هذا العرض على موقع منشأتك. إن كان لديك احتياج إضافي، اسأل المساعد في هذه الصفحة ونوضح لك كتابةً ما نستطيع تقديمه." },
   { q: "كيف أعرف موعد التسليم؟", a: "ننسّق معك موعد التسليم بعد مراجعة محتوى الموقع وتأكيد نطاق العمل." },
   { q: "هل أستطيع طلب تصميم مختلف بالكامل؟", a: "العرض يشمل تخصيص أحد القالبين المعروضين، ولا يشمل تصميمًا من الصفر أو مزايا برمجية إضافية." },
   { q: "هل يشمل النطاق والاستضافة والتجديد؟", a: "يُحدَّد ما يخص النطاق والاستضافة والتجديد في عرض الطلب المكتوب قبل الدفع، ولا يُفترض شمول خدمات لم يُتفق عليها." },
@@ -67,12 +66,14 @@ const questions = [
 
 export default function RealEstateOfferPage() {
   return <main className={styles.page}>
+    <link rel="stylesheet" href="/assets/chat-widget.css" precedence="default" />
+    <Script src="/assets/chat-widget.js" strategy="lazyOnload" />
     <div className={styles.notice}>قريبًا: عرض الجمعة البيضاء لأول 10 مكاتب عقارية</div>
     <header className={styles.header}>
       <div className={styles.wrap + " " + styles.nav}>
         <Link href="/" className={styles.logo} aria-label="العودة إلى Ketcode">KetCode</Link>
         <nav className={styles.links} aria-label="أقسام الصفحة"><a href="#templates">القوالب</a><a href="#why">لماذا نحن</a><a href="#steps">طريقة العمل</a><a href="#faq">الأسئلة</a></nav>
-        <a className={styles.navAction} href={whatsapp} target="_blank" rel="noopener noreferrer">احجز مكانك</a>
+        <a className={styles.navAction} href={portal}>ابدأ طلبك</a>
       </div>
     </header>
 
@@ -83,10 +84,10 @@ export default function RealEstateOfferPage() {
           <h1>تصميم موقع لمكتبك العقاري، جاهز باسم منشأتك.</h1>
           <p className={styles.subtitle}>موقع يجمع خدماتك ومشاريعك وطرق التواصل في رابط واحد. شاركه مع عملائك، وخلّ الاستفسار عنك أسهل.</p>
           <div className={styles.heroActions}>
-            <a className={styles.primary} href={whatsapp} target="_blank" rel="noopener noreferrer">احجز مكانك في العرض</a>
+            <a className={styles.primary} href={portal}>ابدأ طلبك الآن</a>
             <a className={styles.secondary} href="#templates">شاهد القوالب</a>
           </div>
-          <p className={styles.small}>تصفّح القالب الآن، وراجع المعاينة باسم منشأتك قبل أن تدفع.</p>
+          <p className={styles.small}>تسجّل ببريدك في دقيقة، وتراجع المعاينة باسم منشأتك قبل أن تدفع.</p>
         </div>
         <div id="offer" className={styles.priceCard} aria-label="سعر عرض الجمعة البيضاء">
           <h2>عرض الجمعة البيضاء</h2>
@@ -157,7 +158,7 @@ export default function RealEstateOfferPage() {
 
     <section className={styles.cta}><div className={styles.wrap + " " + styles.ctaGrid}>
       <div><h2>موقع مكتبك العقاري بـ 799 ريالاً.</h2><p>السعر الأساسي 990 ريالاً، وعرض الجمعة البيضاء 799 ريالاً لأول 10 عملاء.</p></div>
-      <div className={styles.heroActions}><a className={styles.primary} href={whatsapp} target="_blank" rel="noopener noreferrer">احجز مكانك عبر واتساب</a></div>
+      <div className={styles.heroActions}><a className={styles.primary} href={portal}>ابدأ طلبك الآن</a></div>
     </div></section>
 
     <footer className={styles.footer}><div className={styles.wrap}><strong>KetCode</strong><span>© 2026 Ketcode. جميع الحقوق محفوظة.</span><div><a href="/terms">الشروط</a><a href="/privacy">الخصوصية</a><a href="/refund">سياسة الاسترجاع</a></div></div></footer>
