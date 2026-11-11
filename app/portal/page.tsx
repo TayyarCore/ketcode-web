@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requirePortalEmail } from "../../lib/factory/auth";
 import { findProject, listProjects, newAccessCode, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
-import { acceptPreview, closeProject, registerProject, saveContact, saveMaterials } from "./actions";
+import { acceptPreview, closeProject, registerProject, saveBusiness, saveContact, saveMaterials } from "./actions";
 import styles from "./portal.module.css";
 
 export const metadata: Metadata = {
@@ -19,8 +19,9 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 ];
 
 const errors: Record<string, string> = {
+  business: "تعذّر حفظ بيانات المنشأة. تحقق من رقمي السجل التجاري وترخيص فال.",
   contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
-  registration: "راجع اسم المكتب واسم العميل ورقم الجوال والقالب والموافقة، ثم أعد المحاولة.",
+  registration: "راجع بيانات الطلب، وأدخل رقم السجل التجاري ورقم ترخيص فال بالأرقام، ثم أعد المحاولة.",
   access: "تعذّر فتح المشروع. اختر مشروعًا من حسابك.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
   references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
@@ -59,6 +60,15 @@ function ContactFields({ project }: { project?: Project }) {
   );
 }
 
+function BusinessFields({ project }: { project?: Project }) {
+  return (
+    <>
+      <label>رقم السجل التجاري<input name="commercial_registration" inputMode="numeric" maxLength={30} defaultValue={project?.commercial_registration ?? ""} required dir="ltr" /></label>
+      <label>رقم ترخيص فال<input name="fal_license" inputMode="numeric" maxLength={30} defaultValue={project?.fal_license ?? ""} required dir="ltr" /></label>
+    </>
+  );
+}
+
 function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
   const index = stages.findIndex(({ id }) => id === project.stage);
   const preview = safePreview(project.preview_url);
@@ -78,6 +88,16 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
               <input type="hidden" name="project" value={project.id} />
             <ContactFields project={project} />
             <button className={styles.button} type="submit">احفظ بيانات التواصل</button>
+          </form>
+        </details>
+      )}
+      {!demo && (
+        <details open={!project.commercial_registration || !project.fal_license}>
+          <summary>بيانات المنشأة</summary>
+          <form className={styles.form} action={saveBusiness}>
+            <input type="hidden" name="project" value={project.id} />
+            <BusinessFields project={project} />
+            <button className={styles.button} type="submit">احفظ بيانات المنشأة</button>
           </form>
         </details>
       )}
@@ -156,6 +176,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       <div className={styles.wrap}>
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
         {error && <p className={styles.error} role="alert">{error}</p>}
+        {project && params.saved === "business" && <p role="status">تم حفظ بيانات المنشأة.</p>}
         {project && params.saved === "contact" && <p role="status">تم حفظ بيانات التواصل.</p>}
         {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
         {email && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
@@ -183,6 +204,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                   <input type="hidden" name="code" value={newAccessCode()} />
                   <label>اسم المكتب أو المنشأة<input name="name" autoComplete="organization" maxLength={100} required /></label>
                   <ContactFields />
+                  <BusinessFields />
                   <p>البريد المسجّل <bdi>{email}</bdi></p>
                   <label>القالب<select name="template"><option value="office">قالب المكتب العقاري</option><option value="projects">قالب المشاريع المتعددة</option></select></label>
                   <label className={styles.check}><input type="checkbox" name="consent" required /> أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</label>

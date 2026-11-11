@@ -8,6 +8,8 @@ export type Project = {
   name: string;
   contact_name?: string | null;
   contact_phone?: string | null;
+  commercial_registration?: string | null;
+  fal_license?: string | null;
   template: "office" | "projects";
   stage: "received" | "building" | "review" | "paid" | "launched";
   preview_url: string | null;
@@ -58,7 +60,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license";
 
 export async function listProjects(email: string) {
   const query = projectQuery(email);
@@ -74,10 +76,13 @@ export async function findProject(email: string, id: string) {
   return (await database(query))[0];
 }
 
-export async function createProject(code: string, name: string, email: string, template: Project["template"], contact: { contact_name: string; contact_phone: string }) {
+type Contact = { contact_name: string; contact_phone: string };
+type Registration = { commercial_registration: string; fal_license: string };
+
+export async function createProject(code: string, name: string, email: string, template: Project["template"], details: Contact & Registration) {
   const [id] = code.split(".");
   const rows = await database(new URLSearchParams({ select: projectColumns }), "POST", {
-    id, name, email, template, access_hash: hash(code), ...contact,
+    id, name, email, template, access_hash: hash(code), ...details,
   });
   return rows[0] ?? await findProject(email, id);
 }
@@ -112,9 +117,9 @@ export async function updateMaterials(email: string, id: string, referenceUrls: 
   })).length === 1;
 }
 
-export async function updateContact(email: string, id: string, contact: { contact_name: string; contact_phone: string }) {
+export async function updateProjectDetails(email: string, id: string, details: Contact | Registration) {
   if (!projectIdPattern.test(id)) return false;
   const query = projectQuery(email, id);
   query.set("select", "id");
-  return (await database(query, "PATCH", contact)).length === 1;
+  return (await database(query, "PATCH", details)).length === 1;
 }

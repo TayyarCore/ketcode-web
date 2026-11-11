@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePortalEmail, signOut } from "../../lib/factory/auth";
 import { isRateLimited } from "../../lib/rate-limit";
-import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, updateContact, updateMaterials } from "../../lib/factory/portal";
+import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, updateProjectDetails, updateMaterials } from "../../lib/factory/portal";
 
 const contact = z.object({
   contact_name: z.string().trim().min(2).max(100),
@@ -15,7 +15,17 @@ const contact = z.object({
     .transform((value) => value.startsWith("05") ? "+966" + value.slice(1) : value),
 });
 
+const registrationNumber = z.string().trim().transform((value) =>
+  value.replace(/[٠-٩۰-۹]/g, (digit) => String(digit.charCodeAt(0) & 15)))
+  .pipe(z.string().regex(/^\d{1,30}$/));
+
+const business = z.object({
+  commercial_registration: registrationNumber,
+  fal_license: registrationNumber,
+});
+
 const registration = contact.extend({
+  ...business.shape,
   code: z.string().regex(accessPattern),
   name: z.string().trim().min(2).max(100),
   template: z.enum(["office", "projects"]),
@@ -42,8 +52,8 @@ export async function registerProject(form: FormData) {
   if (!portalEnabled() || await limited("register")) redirect("/portal?error=unavailable");
   const parsed = registration.safeParse(Object.fromEntries(form));
   if (!parsed.success) redirect("/portal?error=registration");
-  const { code, name, template, contact_name, contact_phone } = parsed.data;
-  const project = await createProject(code, name, email, template, { contact_name, contact_phone }).catch(() => undefined);
+  const { code, name, template, contact_name, contact_phone, commercial_registration, fal_license } = parsed.data;
+  const project = await createProject(code, name, email, template, { contact_name, contact_phone, commercial_registration, fal_license }).catch(() => undefined);
   if (!project) redirect("/portal?error=unavailable");
   redirect(projectPath(project.id));
 }
@@ -99,6 +109,16 @@ export async function saveContact(form: FormData) {
   const id = submittedProject(form);
   const parsed = contact.safeParse(Object.fromEntries(form));
   if (!parsed.success) redirect(projectPath(id, "&error=contact"));
-  const saved = await updateContact(email, id, parsed.data).catch(() => false);
+  const saved = await updateProjectDetails(email, id, parsed.data).catch(() => false);
   redirect(projectPath(id, saved ? "&saved=contact" : "&error=contact"));
+}
+
+export async function saveBusiness(form: FormData) {
+  const email = await requirePortalEmail();
+  if (!portalEnabled() || await limited("business")) redirect("/portal?error=unavailable");
+  const id = submittedProject(form);
+  const parsed = business.safeParse(Object.fromEntries(form));
+  if (!parsed.success) redirect(projectPath(id, "&error=business"));
+  const saved = await updateProjectDetails(email, id, parsed.data).catch(() => false);
+  redirect(projectPath(id, saved ? "&saved=business" : "&error=business"));
 }
