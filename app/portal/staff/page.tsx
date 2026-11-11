@@ -4,7 +4,7 @@ import { requireFactoryStaff } from "../../../lib/factory/staff";
 import { closeProject } from "../actions";
 import styles from "../portal.module.css";
 import board from "./board.module.css";
-import { changeStage } from "./actions";
+import { changeStage, confirmPayment } from "./actions";
 
 const stages: Record<Project["stage"], string> = {
   received: "استلمنا الطلب",
@@ -40,8 +40,8 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
         <section className={styles.card}>
           <p className={styles.kicker}>Ketcode</p>
           <h1>طلبات العملاء</h1>
-          {params.saved && <p role="status">تم تحديث الطلب.</p>}
-          {(params.error || projects === null) && <p role="alert" className={styles.error}>تعذّر إتمام الطلب. حدّث الصفحة وحاول مرة أخرى.</p>}
+          {params.saved && <p role="status">{params.saved === "payment" ? "تم تأكيد الدفع وربطه بالطلب." : "تم تحديث الطلب."}</p>}
+          {(params.error || projects === null) && <p role="alert" className={styles.error}>{params.error === "payment" ? "تعذّر تأكيد الدفع. تحقق من معرّف جلسة Stripe وإعدادات الربط وحالة الطلب." : "تعذّر إتمام الطلب. حدّث الصفحة وحاول مرة أخرى."}</p>}
           {projects?.length === 0 && <p>لا توجد طلبات حاليًا.</p>}
         </section>
         {projects && (
@@ -59,6 +59,13 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
                       <h3>{project.name}</h3>
                       {project.test_payment && <p>دفع تجريبي</p>}
                       <p>{nextStep(project)}</p>
+                      {project.stage === "review" && project.preview_url && project.preview_url === project.approved_preview_url && (
+                        <form className={styles.form} action={confirmPayment}>
+                          <input type="hidden" name="project" value={project.id} />
+                          <label>معرّف جلسة Stripe<input name="session" placeholder="cs_…" maxLength={250} required dir="ltr" /></label>
+                          <button className={styles.button} type="submit">تحقّق من الدفع</button>
+                        </form>
+                      )}
                       <details>
                         <summary>بيانات الطلب</summary>
                         <p>{project.contact_name} · <bdi>{project.email}</bdi>{project.contact_phone && <> · <bdi>{project.contact_phone}</bdi></>}</p>

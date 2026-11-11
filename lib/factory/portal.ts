@@ -188,3 +188,28 @@ export async function updateStaffProjectStage(id: string, action: "build" | "rev
   query.set("approved_preview_url", "eq." + project.preview_url);
   return (await database(query, "PATCH", { stage: "launched" })).length === 1;
 }
+
+export async function recordStaffPayment(id: string, payment: { sessionId: string; test: boolean }) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = new URLSearchParams({
+    id: "eq." + id,
+    select: "stage,preview_url,approved_preview_url,stripe_checkout_session_id,test_payment",
+  });
+  const rows = await database(query) as (Project & { stripe_checkout_session_id?: string })[];
+  const project = rows[0];
+  if (!project) return false;
+  if (project.stage === "paid" || project.stage === "launched") {
+    return project.stripe_checkout_session_id === payment.sessionId && project.test_payment === payment.test;
+  }
+  if (project.stage !== "review" || !project.preview_url || project.preview_url !== project.approved_preview_url) return false;
+  query.set("stage", "eq.review");
+  query.set("preview_url", "eq." + project.preview_url);
+  query.set("approved_preview_url", "eq." + project.preview_url);
+  query.set("stripe_checkout_session_id", "is.null");
+  query.set("select", "id");
+  return (await database(query, "PATCH", {
+    stage: "paid",
+    test_payment: payment.test,
+    stripe_checkout_session_id: payment.sessionId,
+  })).length === 1;
+}
