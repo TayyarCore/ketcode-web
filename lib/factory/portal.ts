@@ -6,6 +6,8 @@ export const accessPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[A-Z
 export type Project = {
   id: string;
   name: string;
+  contact_name?: string | null;
+  contact_phone?: string | null;
   template: "office" | "projects";
   stage: "received" | "building" | "review" | "paid" | "launched";
   preview_url: string | null;
@@ -56,7 +58,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone";
 
 export async function findProject(email: string, code?: string) {
   if (!code || !accessPattern.test(code)) return undefined;
@@ -66,10 +68,10 @@ export async function findProject(email: string, code?: string) {
   return project?.email.toLowerCase() === email ? project : undefined;
 }
 
-export async function createProject(code: string, name: string, email: string, template: Project["template"]) {
+export async function createProject(code: string, name: string, email: string, template: Project["template"], contact: { contact_name: string; contact_phone: string }) {
   const [id] = code.split(".");
   const rows = await database(new URLSearchParams({ select: projectColumns }), "POST", {
-    id, name, email, template, access_hash: hash(code),
+    id, name, email, template, access_hash: hash(code), ...contact,
   });
   return rows[0] ?? await findProject(email, code);
 }
@@ -106,4 +108,13 @@ export async function updateMaterials(email: string, code: string, referenceUrls
     reference_urls: referenceUrls,
     ...(logo && { logo_name: logo.name, logo_data: logo.data }),
   })).length === 1;
+}
+
+export async function updateContact(email: string, code: string, contact: { contact_name: string; contact_phone: string }) {
+  const project = await findProject(email, code);
+  if (!project) return false;
+  const query = accessQuery(code);
+  query.set("email", "eq." + project.email);
+  query.set("select", "id");
+  return (await database(query, "PATCH", contact)).length === 1;
 }

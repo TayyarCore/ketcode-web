@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requirePortalEmail } from "../../lib/factory/auth";
 import { cookies } from "next/headers";
 import { findProject, newAccessCode, portalCookie, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
-import { acceptPreview, closeProject, openProject, registerProject, saveMaterials } from "./actions";
+import { acceptPreview, closeProject, openProject, registerProject, saveContact, saveMaterials } from "./actions";
 import styles from "./portal.module.css";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const stages: { id: Project["stage"]; title: string; next: string }[] = [
-  { id: "received", title: "استلمنا طلبك", next: "سجّل اسمك أو اسم منشأتك وبريدك الإلكتروني، واختر القالب. احتفظ برمز الدخول للرجوع إلى مشروعك." },
+  { id: "received", title: "استلمنا طلبك", next: "احتفظ برمز الدخول للرجوع إلى مشروعك." },
   { id: "building", title: "نعمل على تجهيز موقعك", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المشاريع، جهّز اسم كل مشروع ونبذة عنه وصوره." },
   { id: "review", title: "المعاينة جاهزة للمراجعة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
   { id: "paid", title: "تم تأكيد الدفع", next: "يظهر زر دفع 799 ريال بعد اعتماد المعاينة. بعد تأكيد الدفع، شاركنا اسم النطاق إذا كان عندك نطاق ترغب بربطه." },
@@ -20,7 +20,8 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 ];
 
 const errors: Record<string, string> = {
-  registration: "راجع الاسم والقالب والموافقة، ثم أعد المحاولة.",
+  contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
+  registration: "راجع اسم المكتب واسم العميل ورقم الجوال والقالب والموافقة، ثم أعد المحاولة.",
   access: "تعذّر فتح المشروع. تحقق من الرمز ومن بريدك المسجّل للمشروع.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
   references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
@@ -50,6 +51,15 @@ function projectPaymentUrl(project: Project) {
   return url.href;
 }
 
+function ContactFields({ project }: { project?: Project }) {
+  return (
+    <>
+      <label>اسم العميل<input name="contact_name" autoComplete="name" maxLength={100} defaultValue={project?.contact_name ?? ""} required /></label>
+      <label>رقم الجوال<input name="contact_phone" type="tel" autoComplete="tel" maxLength={32} defaultValue={project?.contact_phone ?? ""} required dir="ltr" /></label>
+    </>
+  );
+}
+
 function ProjectView({ project, code, demo }: { project: Project; code?: string; demo: boolean }) {
   const index = stages.findIndex(({ id }) => id === project.stage);
   const preview = safePreview(project.preview_url);
@@ -62,6 +72,15 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
       <p className={styles.kicker}>{demo ? "معاينة ببيانات تجريبية" : "صفحة مشروعك"}</p>
       <h1>{project.name}</h1>
       <p>{project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
+      {!demo && (
+        <details open={!project.contact_name || !project.contact_phone}>
+          <summary>بيانات التواصل</summary>
+          <form className={styles.form} action={saveContact}>
+            <ContactFields project={project} />
+            <button className={styles.button} type="submit">احفظ بيانات التواصل</button>
+          </form>
+        </details>
+      )}
       <h2>المطلوب منك في كل مرحلة</h2>
       <ol className={styles.steps}>
         {stages.map(({ id, title, next }, i) => (
@@ -136,6 +155,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       <div className={styles.wrap}>
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
         {error && <p className={styles.error} role="alert">{error}</p>}
+        {project && params.saved === "contact" && <p role="status">تم حفظ بيانات التواصل.</p>}
         {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
         {email && !project && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
         {project ? <ProjectView project={project} code={code} demo={demo} /> : (
@@ -147,7 +167,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               {enabled ? (
                 <form className={styles.form} action={registerProject}>
                   <input type="hidden" name="code" value={newAccessCode()} />
-                  <label>اسمك أو اسم المنشأة<input name="name" autoComplete="name" maxLength={100} required /></label>
+                  <label>اسم المكتب أو المنشأة<input name="name" autoComplete="organization" maxLength={100} required /></label>
+                  <ContactFields />
                   <p>البريد المسجّل <bdi>{email}</bdi></p>
                   <label>القالب<select name="template"><option value="office">قالب المكتب العقاري</option><option value="projects">قالب المشاريع المتعددة</option></select></label>
                   <label className={styles.check}><input type="checkbox" name="consent" required /> أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</label>
