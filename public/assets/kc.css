@@ -175,10 +175,12 @@ html[data-theme="dark"] .frame{box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
   .steps{grid-template-columns:1fr 1fr;row-gap:2rem}
   .steps::before{display:none}
 }
-@media (max-width:600px){
-  body{font-size:16px}
+@media (max-width:760px){
   .promise-grid{grid-template-columns:1fr}
   .promise-item+.promise-item{border-inline-start:0;border-top:1px solid var(--line)}
+}
+@media (max-width:600px){
+  body{font-size:16px}
   .steps{grid-template-columns:1fr}
   .actions .btn{flex:1 1 100%}
   .login-link{display:none}
@@ -192,8 +194,8 @@ html[data-theme="dark"] .frame{box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
 }
 
 /* Sales assistant in the new identity */
-.kc-chat-root{--kc-chat-teal:#3A4BE0;--kc-chat-teal-dark:#3A4BE0;font-family:var(--body)}
-.kc-chat-launcher{background:#171A33;color:#fff;border-color:transparent;box-shadow:0 18px 40px -12px rgba(23,26,51,.45)}
-.kc-chat-launcher-mark{color:#171A33;font-family:var(--display)}
-.kc-chat-brand-mark{background:var(--lamp);color:var(--lamp-ink);font-family:var(--display)}
+html .kc-chat-root{--kc-chat-teal:#3A4BE0;--kc-chat-teal-dark:#3A4BE0;font-family:var(--body)}
+html .kc-chat-launcher{background:#171A33;color:#fff;border-color:transparent;box-shadow:0 18px 40px -12px rgba(23,26,51,.45)}
+html .kc-chat-launcher-mark{color:#171A33;font-family:var(--display)}
+html .kc-chat-brand-mark{background:var(--lamp);color:var(--lamp-ink);font-family:var(--display)}
 html[data-theme="dark"] .kc-chat-launcher{background:#3A4BE0}
