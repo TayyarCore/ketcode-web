@@ -34,13 +34,16 @@ function hash(code: string) {
 }
 
 async function database(query: URLSearchParams, method = "GET", body?: object) {
-  if (!portalEnabled()) throw new Error("Portal is disabled");
+  const key = process.env.FACTORY_SUPABASE_SECRET_KEY;
+  if (!key || !portalEnabled()) throw new Error("Portal is disabled");
   const url = new URL("/rest/v1/white_friday_projects", process.env.FACTORY_SUPABASE_URL);
   url.search = query.toString();
   const response = await fetch(url, {
     method,
     headers: {
-      apikey: process.env.FACTORY_SUPABASE_SECRET_KEY!,
+      apikey: key,
+      // Legacy service_role keys are JWTs. Current secret keys use apikey alone.
+      ...(key.startsWith("eyJ") && { Authorization: "Bearer " + key }),
       "Content-Type": "application/json",
       Prefer: "return=representation",
     },
