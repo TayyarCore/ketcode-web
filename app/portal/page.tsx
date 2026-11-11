@@ -113,8 +113,8 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
       {project.stage === "paid" && (
         <section className={styles.materials}>
           <h2>تجهيز الإطلاق الرسمي</h2>
-          {project.test_payment && <p>الدفع التجريبي مؤكد. موعد الإطلاق أدناه للتجربة.</p>}
-          {project.launch_due_at && <LaunchCountdown dueAt={project.launch_due_at} />}
+          {project.test_payment && <p>الدفع التجريبي مؤكد.</p>}
+          {project.launch_due_at ? <LaunchCountdown dueAt={project.launch_due_at} /> : (\n            <p role="status">بانتظار تجهيز الدومين. يبدأ العدّ التنازلي بعد تأكيد جاهزيته.</p>\n          )}
           <form className={styles.form} action={saveLaunchDetails}>
             <input type="hidden" name="project" value={project.id} />
             <label>الدومين المطلوب
