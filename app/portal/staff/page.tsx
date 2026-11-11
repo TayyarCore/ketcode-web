@@ -3,6 +3,7 @@ import { listStaffProjects, safePreview, type Project } from "../../../lib/facto
 import { requireFactoryStaff } from "../../../lib/factory/staff";
 import { closeProject } from "../actions";
 import styles from "../portal.module.css";
+import board from "./board.module.css";
 import { changeStage } from "./actions";
 
 const stages: Record<Project["stage"], string> = {
@@ -31,7 +32,7 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
   const projects = await listStaffProjects().catch(() => null);
   return (
     <main className={styles.page}>
-      <div className={styles.wrap}>
+      <div className={styles.wrap + " " + board.wrap}>
         <header>
           <Link href="/portal?view=projects">مشاريعي</Link>
           <form action={closeProject}><button type="submit" className={styles.secondary}>تسجيل الخروج</button></form>
@@ -43,41 +44,56 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
           {(params.error || projects === null) && <p role="alert" className={styles.error}>تعذّر إتمام الطلب. حدّث الصفحة وحاول مرة أخرى.</p>}
           {projects?.length === 0 && <p>لا توجد طلبات حاليًا.</p>}
         </section>
-        {projects?.map((project) => (
-          <article key={project.id} className={styles.card}>
-            <h2>{project.name}</h2>
-            <p><strong>{stages[project.stage]}</strong>{project.test_payment && " · دفع تجريبي"}</p>
-            <p>{nextStep(project)}</p>
-            <details>
-              <summary>بيانات الطلب</summary>
-              <p>{project.contact_name} · <bdi>{project.email}</bdi>{project.contact_phone && <> · <bdi>{project.contact_phone}</bdi></>}</p>
-              <p>{project.city} · {project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
-              {project.commercial_registration && <p>السجل التجاري <bdi>{project.commercial_registration}</bdi></p>}
-              {project.fal_license && <p>ترخيص فال <bdi>{project.fal_license}</bdi></p>}
-              {project.working_hours && <p>ساعات العمل {project.working_hours}</p>}
-              {project.logo_name && <p><a href={"/portal/staff/logo?project=" + project.id} target="_blank" rel="noreferrer">افتح الشعار</a></p>}
-              {[project.map_url, ...(project.social_links ?? []), ...project.reference_urls].map((value, index) => {
-                const url = safePreview(value ?? null);
-                return url && <p key={index}><a href={url} target="_blank" rel="noreferrer">افتح الرابط {index + 1}</a></p>;
-              })}
-              {project.launch_domain && <p>الدومين <bdi>{project.launch_domain}</bdi>{project.launch_domain_type && <> · {project.launch_domain_type === "existing" ? "ربط دومين قائم" : "تسجيل دومين جديد"}</>}</p>}
-              {project.launch_email_alias && project.launch_domain && <p>البريد المطلوب <bdi>{project.launch_email_alias}@{project.launch_domain}</bdi>{project.launch_email_type && <> · {project.launch_email_type === "mailbox" ? "صندوق مستقل" : "تحويل"}</>}</p>}
-              {safePreview(project.preview_url) && <p><a href={safePreview(project.preview_url)} target="_blank" rel="noreferrer">افتح الموقع</a></p>}
-            </details>
-            {(project.stage === "received" || project.stage === "building" || project.stage === "paid") && (
-              <form className={styles.form} action={changeStage}>
-                <input type="hidden" name="project" value={project.id} />
-                {project.stage === "received" && <button className={styles.button} name="operation" value="build">ابدأ التجهيز</button>}
-                {project.stage === "building" && <>
-                  <label>رابط المعاينة<input name="preview" type="url" maxLength={2048} required dir="ltr" /></label>
-                  <button className={styles.button} name="operation" value="review">أتح المعاينة للعميل</button>
-                </>}
-                {project.stage === "paid" && project.launch_domain_type && project.launch_email_type &&
-                  <button className={styles.button} name="operation" value="launch">سجّل تسليم الموقع</button>}
-              </form>
-            )}
-          </article>
-        ))}
+        {projects && (
+          <div className={board.lanes} aria-label="مراحل تنفيذ الطلبات">
+            {Object.entries(stages).map(([stage, title]) => {
+              const orders = projects.filter((project) => project.stage === stage);
+              return (
+                <section className={board.lane} key={stage} aria-label={title}>
+                  <div className={board.laneHeader}>
+                    <h2>{title}</h2><span aria-label="عدد الطلبات">{orders.length}</span>
+                  </div>
+                  {orders.length === 0 && <p className={board.empty}>لا توجد طلبات في هذه المرحلة.</p>}
+                  {orders.map((project) => (
+                    <article key={project.id} className={styles.card + " " + board.order}>
+                      <h3>{project.name}</h3>
+                      {project.test_payment && <p>دفع تجريبي</p>}
+                      <p>{nextStep(project)}</p>
+                      <details>
+                        <summary>بيانات الطلب</summary>
+                        <p>{project.contact_name} · <bdi>{project.email}</bdi>{project.contact_phone && <> · <bdi>{project.contact_phone}</bdi></>}</p>
+                        <p>{project.city} · {project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
+                        {project.commercial_registration && <p>السجل التجاري <bdi>{project.commercial_registration}</bdi></p>}
+                        {project.fal_license && <p>ترخيص فال <bdi>{project.fal_license}</bdi></p>}
+                        {project.working_hours && <p>ساعات العمل {project.working_hours}</p>}
+                        {project.logo_name && <p><a href={"/portal/staff/logo?project=" + project.id} target="_blank" rel="noreferrer">افتح الشعار</a></p>}
+                        {[project.map_url, ...(project.social_links ?? []), ...project.reference_urls].map((value, index) => {
+                          const url = safePreview(value ?? null);
+                          return url && <p key={index}><a href={url} target="_blank" rel="noreferrer">افتح الرابط {index + 1}</a></p>;
+                        })}
+                        {project.launch_domain && <p>الدومين <bdi>{project.launch_domain}</bdi>{project.launch_domain_type && <> · {project.launch_domain_type === "existing" ? "ربط دومين قائم" : "تسجيل دومين جديد"}</>}</p>}
+                        {project.launch_email_alias && project.launch_domain && <p>البريد المطلوب <bdi>{project.launch_email_alias}@{project.launch_domain}</bdi>{project.launch_email_type && <> · {project.launch_email_type === "mailbox" ? "صندوق مستقل" : "تحويل"}</>}</p>}
+                        {safePreview(project.preview_url) && <p><a href={safePreview(project.preview_url)} target="_blank" rel="noreferrer">افتح الموقع</a></p>}
+                      </details>
+                      {(project.stage === "received" || project.stage === "building" || project.stage === "paid") && (
+                        <form className={styles.form} action={changeStage}>
+                          <input type="hidden" name="project" value={project.id} />
+                          {project.stage === "received" && <button className={styles.button} name="operation" value="build">ابدأ التجهيز</button>}
+                          {project.stage === "building" && <>
+                            <label>رابط المعاينة<input name="preview" type="url" maxLength={2048} required dir="ltr" /></label>
+                            <button className={styles.button} name="operation" value="review">أتح المعاينة للعميل</button>
+                          </>}
+                          {project.stage === "paid" && project.launch_domain_type && project.launch_email_type &&
+                            <button className={styles.button} name="operation" value="launch">سجّل تسليم الموقع</button>}
+                        </form>
+                      )}
+                    </article>
+                  ))}
+                </section>
+              );
+            })}
+          </div>
+        )}
       </div>
     </main>
   );
