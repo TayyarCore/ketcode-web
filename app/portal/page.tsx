@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { requirePortalEmail } from "../../lib/factory/auth";
-import { cookies } from "next/headers";
-import { findProject, newAccessCode, portalCookie, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
-import { acceptPreview, closeProject, openProject, registerProject, saveContact, saveMaterials } from "./actions";
+import { findProject, listProjects, newAccessCode, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
+import { acceptPreview, closeProject, registerProject, saveContact, saveMaterials } from "./actions";
 import styles from "./portal.module.css";
 
 export const metadata: Metadata = {
@@ -12,7 +11,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const stages: { id: Project["stage"]; title: string; next: string }[] = [
-  { id: "received", title: "استلمنا طلبك", next: "احتفظ برمز الدخول للرجوع إلى مشروعك." },
+  { id: "received", title: "استلمنا طلبك", next: "يمكنك متابعة حالة الطلب من هذه الصفحة." },
   { id: "building", title: "نعمل على تجهيز موقعك", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المشاريع، جهّز اسم كل مشروع ونبذة عنه وصوره." },
   { id: "review", title: "المعاينة جاهزة للمراجعة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
   { id: "paid", title: "تم تأكيد الدفع", next: "يظهر زر دفع 799 ريال بعد اعتماد المعاينة. بعد تأكيد الدفع، شاركنا اسم النطاق إذا كان عندك نطاق ترغب بربطه." },
@@ -22,7 +21,7 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 const errors: Record<string, string> = {
   contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
   registration: "راجع اسم المكتب واسم العميل ورقم الجوال والقالب والموافقة، ثم أعد المحاولة.",
-  access: "تعذّر فتح المشروع. تحقق من الرمز ومن بريدك المسجّل للمشروع.",
+  access: "تعذّر فتح المشروع. اختر مشروعًا من حسابك.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
   references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
   logo: "اختر صورة PNG أو JPG أو WebP بحجم لا يتجاوز 512 كيلوبايت.",
@@ -60,7 +59,7 @@ function ContactFields({ project }: { project?: Project }) {
   );
 }
 
-function ProjectView({ project, code, demo }: { project: Project; code?: string; demo: boolean }) {
+function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
   const index = stages.findIndex(({ id }) => id === project.stage);
   const preview = safePreview(project.preview_url);
   const approved = Boolean(preview && project.preview_url === project.approved_preview_url);
@@ -76,6 +75,7 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
         <details open={!project.contact_name || !project.contact_phone}>
           <summary>بيانات التواصل</summary>
           <form className={styles.form} action={saveContact}>
+              <input type="hidden" name="project" value={project.id} />
             <ContactFields project={project} />
             <button className={styles.button} type="submit">احفظ بيانات التواصل</button>
           </form>
@@ -97,6 +97,7 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
         <section className={styles.materials}>
           <h2>مواد تجهيز موقعك</h2>
           <form className={styles.form} action={demo ? undefined : saveMaterials}>
+              <input type="hidden" name="project" value={project.id} />
             <label>
               روابط مواقع أعجبتني (اختياري)
               <textarea name="references" disabled={demo} dir="ltr" rows={3} maxLength={1600}
@@ -119,6 +120,7 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
           <a className={styles.button} href={preview} target="_blank" rel="noopener noreferrer">افتح معاينة موقعك ↗</a>
           {project.stage === "review" && !approved && (
             <form action={acceptPreview}>
+              <input type="hidden" name="project" value={project.id} />
               <input type="hidden" name="preview" value={project.preview_url ?? ""} />
               <button className={styles.button} type="submit">اعتمد المعاينة</button>
             </form>
@@ -128,27 +130,26 @@ function ProjectView({ project, code, demo }: { project: Project; code?: string;
           )}
         </div>
       )}
-      {code && (
-        <details>
-          <summary>رمز الرجوع إلى مشروعك</summary>
-          <p>احتفظ بهذا الرمز في مكان خاص لفتح مشروعك من جهاز آخر.</p>
-          <code className={styles.code} dir="ltr">{code}</code>
-        </details>
-      )}
-      {code && <form action={closeProject}><button className={styles.secondary} type="submit">إغلاق الجلسة</button></form>}
     </section>
   );
 }
 
-export default async function PortalPage({ searchParams }: { searchParams: Promise<{ error?: string; demo?: string; saved?: string }> }) {
+export default async function PortalPage({ searchParams }: { searchParams: Promise<{ error?: string; demo?: string; saved?: string; project?: string; view?: string }> }) {
   const params = await searchParams;
   const enabled = portalEnabled();
   const canDemo = process.env.VERCEL_ENV === "preview";
   const demo = canDemo && params.demo === "1";
   const email = enabled && !demo ? await requirePortalEmail() : undefined;
-  const code = email ? (await cookies()).get(portalCookie)?.value : undefined;
-  const project = demo ? sample : email ? await findProject(email, code).catch(() => null) : undefined;
-  const error = project === null ? errors.unavailable : Object.hasOwn(errors, params.error ?? "") ? errors[params.error ?? ""] : undefined;
+  const projects = email ? await listProjects(email).catch(() => null) : [];
+  const showNew = params.view === "new";
+  const showList = params.view === "projects";
+  const selected = showNew || showList ? undefined : params.project ?? (projects?.length === 1 ? projects[0].id : undefined);
+  const project = demo ? sample : email && selected && projects?.some(({ id }) => id === selected)
+    ? await findProject(email, selected).catch(() => null)
+    : undefined;
+  const error = projects === null || project === null ? errors.unavailable
+    : selected && !project ? errors.access
+    : Object.hasOwn(errors, params.error ?? "") ? errors[params.error ?? ""] : undefined;
 
   return (
     <main className={styles.page}>
@@ -157,8 +158,21 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         {error && <p className={styles.error} role="alert">{error}</p>}
         {project && params.saved === "contact" && <p role="status">تم حفظ بيانات التواصل.</p>}
         {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
-        {email && !project && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
-        {project ? <ProjectView project={project} code={code} demo={demo} /> : (
+        {email && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
+        {email && projects && projects.length > 0 && (project || showNew) &&
+          <p><a href="/portal?view=projects">مشاريعي</a></p>}
+        {project ? <ProjectView project={project} demo={demo} /> : projects === null ? null
+          : projects.length > 0 && !showNew ? (
+            <section className={styles.card}>
+              <h1>مشاريعي</h1>
+              <ul>
+                {projects.map(({ id, name, stage }) => (
+                  <li key={id}><a href={"/portal?project=" + id}>{name}</a> · {stages.find((item) => item.id === stage)?.title}</li>
+                ))}
+              </ul>
+              <a className={styles.button} href="/portal?view=new">اطلب موقعًا جديدًا</a>
+            </section>
+          ) : (
           <>
             <section className={styles.card}>
               <p className={styles.kicker}>من الطلب إلى الإطلاق</p>
@@ -178,13 +192,6 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                 <p>التسجيل غير متاح في هذه النسخة. {canDemo && <a href="/portal?demo=1">شاهد نموذج صفحة المشروع</a>}</p>
               )}
             </section>
-            {enabled && <section className={styles.card}>
-              <h2>عندك مشروع سابق؟</h2>
-              <form className={styles.form} action={openProject}>
-                <label>رمز الدخول الخاص بالمشروع<input name="code" autoComplete="off" maxLength={80} required dir="ltr" /></label>
-                <button className={styles.button} type="submit">افتح صفحة مشروعك</button>
-              </form>
-            </section>}
           </>
         )}
       </div>

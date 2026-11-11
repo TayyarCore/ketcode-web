@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
-export const portalCookie = "ketcode_project";
+export const projectIdPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/;
 export const accessPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[A-Za-z0-9_-]{43}$/;
 
 export type Project = {
@@ -26,9 +26,9 @@ export function newAccessCode() {
   return randomUUID() + "." + randomBytes(32).toString("base64url");
 }
 
-function accessQuery(code: string) {
-  const [id] = code.split(".");
-  return new URLSearchParams({ id: "eq." + id, access_hash: "eq." + hash(code) });
+function projectQuery(email: string, id?: string) {
+  const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new URLSearchParams({ email: "imatch.^" + escapedEmail + "$", ...(id && { id: "eq." + id }) });
 }
 
 function hash(code: string) {
@@ -60,12 +60,18 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
 
 const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone";
 
-export async function findProject(email: string, code?: string) {
-  if (!code || !accessPattern.test(code)) return undefined;
-  const query = accessQuery(code);
-  query.set("select", projectColumns + ",email");
-  const project = (await database(query))[0];
-  return project?.email.toLowerCase() === email ? project : undefined;
+export async function listProjects(email: string) {
+  const query = projectQuery(email);
+  query.set("select", "id,name,template,stage");
+  query.set("order", "created_at.desc,id.desc");
+  return database(query);
+}
+
+export async function findProject(email: string, id: string) {
+  if (!projectIdPattern.test(id)) return undefined;
+  const query = projectQuery(email, id);
+  query.set("select", projectColumns);
+  return (await database(query))[0];
 }
 
 export async function createProject(code: string, name: string, email: string, template: Project["template"], contact: { contact_name: string; contact_phone: string }) {
@@ -73,7 +79,7 @@ export async function createProject(code: string, name: string, email: string, t
   const rows = await database(new URLSearchParams({ select: projectColumns }), "POST", {
     id, name, email, template, access_hash: hash(code), ...contact,
   });
-  return rows[0] ?? await findProject(email, code);
+  return rows[0] ?? await findProject(email, id);
 }
 
 export function safePreview(value: string | null) {
@@ -85,23 +91,19 @@ export function safePreview(value: string | null) {
   }
 }
 
-export async function approveProject(email: string, code: string, preview: string) {
-  if (!accessPattern.test(code) || !safePreview(preview)) return false;
-  const project = await findProject(email, code);
-  if (!project) return false;
-  const query = accessQuery(code);
-  query.set("email", "eq." + project.email);
+export async function approveProject(email: string, id: string, preview: string) {
+  if (!safePreview(preview)) return false;
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
   query.set("stage", "eq.review");
   query.set("preview_url", "eq." + preview);
   query.set("select", "id");
   return (await database(query, "PATCH", { approved_preview_url: preview })).length === 1;
 }
 
-export async function updateMaterials(email: string, code: string, referenceUrls: string[], logo?: { name: string; data: string }) {
-  const project = await findProject(email, code);
-  if (!project) return false;
-  const query = accessQuery(code);
-  query.set("email", "eq." + project.email);
+export async function updateMaterials(email: string, id: string, referenceUrls: string[], logo?: { name: string; data: string }) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
   query.set("stage", "in.(received,building)");
   query.set("select", "id");
   return (await database(query, "PATCH", {
@@ -110,11 +112,9 @@ export async function updateMaterials(email: string, code: string, referenceUrls
   })).length === 1;
 }
 
-export async function updateContact(email: string, code: string, contact: { contact_name: string; contact_phone: string }) {
-  const project = await findProject(email, code);
-  if (!project) return false;
-  const query = accessQuery(code);
-  query.set("email", "eq." + project.email);
+export async function updateContact(email: string, id: string, contact: { contact_name: string; contact_phone: string }) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
   query.set("select", "id");
   return (await database(query, "PATCH", contact)).length === 1;
 }
