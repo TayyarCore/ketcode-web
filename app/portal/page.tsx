@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { requirePortalEmail } from "../../lib/factory/auth";
 import { findProject, listProjects, newAccessCode, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
-import { acceptPreview, closeProject, registerProject, saveBusiness, saveContact, saveMaterials } from "./actions";
+import { acceptPreview, closeProject, registerProject, saveBusiness, saveContact, saveLaunchDetails, saveMaterials } from "./actions";
+import { LaunchCountdown } from "./launch-countdown";
 import styles from "./portal.module.css";
 
 export const metadata: Metadata = {
@@ -14,11 +15,12 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
   { id: "received", title: "استلمنا طلبك", next: "يمكنك متابعة حالة الطلب من هذه الصفحة." },
   { id: "building", title: "نعمل على تجهيز موقعك", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المشاريع، جهّز اسم كل مشروع ونبذة عنه وصوره." },
   { id: "review", title: "المعاينة جاهزة للمراجعة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
-  { id: "paid", title: "تم تأكيد الدفع", next: "يظهر زر دفع 799 ريال بعد اعتماد المعاينة. بعد تأكيد الدفع، شاركنا اسم النطاق إذا كان عندك نطاق ترغب بربطه." },
+  { id: "paid", title: "تم تأكيد الدفع", next: "أرسل اسم النطاق المطلوب واختر عنوان البريد الرسمي لتجهيز الإطلاق." },
   { id: "launched", title: "تم إطلاق موقعك", next: "افتح رابط موقعك النهائي، وجرّب وسائل التواصل، ثم شارك الرابط مع عملائك." },
 ];
 
 const errors: Record<string, string> = {
+  launch: "تعذّر حفظ بيانات الإطلاق. أدخل نطاقًا مثل example.com واختر عنوان البريد.",
   business: "تعذّر حفظ بيانات المنشأة. راجع الأرقام والمدينة وتأكد أن الروابط تبدأ بـ https://.",
   contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
   registration: "راجع بيانات الطلب والأرقام والمدينة وروابط الموقع، ثم أعد المحاولة.",
@@ -108,6 +110,26 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
           </form>
         </details>
       )}
+      {project.stage === "paid" && (
+        <section className={styles.materials}>
+          <h2>تجهيز الإطلاق الرسمي</h2>
+          {project.test_payment && <p>الدفع التجريبي مؤكد. موعد الإطلاق أدناه للتجربة.</p>}
+          {project.launch_due_at && <LaunchCountdown dueAt={project.launch_due_at} />}
+          <form className={styles.form} action={saveLaunchDetails}>
+            <input type="hidden" name="project" value={project.id} />
+            <label>الدومين المطلوب
+              <input name="launch_domain" placeholder="example.com" defaultValue={project.launch_domain ?? ""} maxLength={253} required dir="ltr" />
+              <small>اكتب اسم النطاق الذي تملكه أو ترغب في استخدامه.</small>
+            </label>
+            <label>البريد الرسمي
+              <select name="launch_email_alias" defaultValue={project.launch_email_alias ?? "info"} dir="ltr">
+                {["info", "contact", "team"].map((alias) => <option key={alias} value={alias}>{alias}@{project.launch_domain ?? "example.com"}</option>)}
+              </select>
+            </label>
+            <button className={styles.button} type="submit">احفظ بيانات الإطلاق</button>
+          </form>
+        </section>
+      )}
       <h2>المطلوب منك في كل مرحلة</h2>
       <ol className={styles.steps}>
         {stages.map(({ id, title, next }, i) => (
@@ -183,6 +205,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       <div className={styles.wrap}>
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
         {error && <p className={styles.error} role="alert">{error}</p>}
+        {project && params.saved === "launch" && <p role="status">تم حفظ بيانات الإطلاق.</p>}
         {project && params.saved === "business" && <p role="status">تم حفظ بيانات المنشأة.</p>}
         {project && params.saved === "contact" && <p role="status">تم حفظ بيانات التواصل.</p>}
         {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}

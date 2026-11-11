@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePortalEmail, signOut } from "../../lib/factory/auth";
 import { isRateLimited } from "../../lib/rate-limit";
-import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, safePreview, updateProjectDetails, updateMaterials } from "../../lib/factory/portal";
+import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, safePreview, updateLaunchDetails, updateProjectDetails, updateMaterials } from "../../lib/factory/portal";
 
 const contact = z.object({
   contact_name: z.string().trim().min(2).max(100),
@@ -128,4 +128,20 @@ export async function saveBusiness(form: FormData) {
   if (!parsed.success) redirect(projectPath(id, "&error=business"));
   const saved = await updateProjectDetails(email, id, parsed.data).catch(() => false);
   redirect(projectPath(id, saved ? "&saved=business" : "&error=business"));
+}
+
+const launchDetails = z.object({
+  launch_domain: z.string().trim().toLowerCase().max(253)
+    .regex(/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/),
+  launch_email_alias: z.enum(["info", "contact", "team"]),
+});
+
+export async function saveLaunchDetails(form: FormData) {
+  const email = await requirePortalEmail();
+  if (!portalEnabled() || await limited("launch")) redirect("/portal?error=unavailable");
+  const id = submittedProject(form);
+  const parsed = launchDetails.safeParse(Object.fromEntries(form));
+  if (!parsed.success) redirect(projectPath(id, "&error=launch"));
+  const saved = await updateLaunchDetails(email, id, parsed.data).catch(() => false);
+  redirect(projectPath(id, saved ? "&saved=launch" : "&error=launch"));
 }

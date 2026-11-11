@@ -6,6 +6,10 @@ export const accessPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[A-Z
 export type Project = {
   id: string;
   name: string;
+  launch_due_at?: string | null;
+  launch_domain?: string | null;
+  launch_email_alias?: "info" | "contact" | "team" | null;
+  test_payment?: boolean;
   contact_name?: string | null;
   contact_phone?: string | null;
   commercial_registration?: string | null;
@@ -64,7 +68,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours,launch_due_at,launch_domain,launch_email_alias,test_payment";
 
 export async function listProjects(email: string) {
   const query = projectQuery(email);
@@ -131,6 +135,17 @@ export async function updateMaterials(email: string, id: string, referenceUrls: 
 export async function updateProjectDetails(email: string, id: string, details: Contact | Registration) {
   if (!projectIdPattern.test(id)) return false;
   const query = projectQuery(email, id);
+  query.set("select", "id");
+  return (await database(query, "PATCH", details)).length === 1;
+}
+
+export async function updateLaunchDetails(email: string, id: string, details: {
+  launch_domain: string;
+  launch_email_alias: "info" | "contact" | "team";
+}) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
+  query.set("stage", "eq.paid");
   query.set("select", "id");
   return (await database(query, "PATCH", details)).length === 1;
 }
