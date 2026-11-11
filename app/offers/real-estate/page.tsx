@@ -143,6 +143,10 @@ export default function RealEstateOfferPage() {
     <section id="faq" className={styles.section}><div className={styles.wrap + " " + styles.faqWrap}>
       <p className={styles.eyebrow}>إجابات سريعة</p><h2>الأسئلة الشائعة</h2>
       {questions.map(item=><details key={item.q} className={styles.faq}><summary>{item.q}</summary><p>{item.a}</p></details>)}
+      <details className={styles.faq}>
+        <summary>من وين أحجز دومين سعودي؟</summary>
+        <p>تقدر تحجز دومين سعودي من <a href="https://souqt2.sa/Home" target="_blank" rel="noopener noreferrer">سوق التقنية</a> أو <a href="https://www.massarcloud.sa/ar/landing/sa-domains" target="_blank" rel="noopener noreferrer">مسار كلاود</a>.</p>
+      </details>
     </div></section>
     <section className={styles.cta}><div className={styles.wrap}>
       <p className={styles.eyebrow}>جاهز لموقع منشأتك؟</p><h2>المعاينة أمامك. هل حان وقت موقع شركتك؟</h2><p>السعر الأساسي 990 ريال، وعرض الجمعة البيضاء 799 ريال للباقة نفسها.</p>
