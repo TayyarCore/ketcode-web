@@ -1,11 +1,25 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 
-export const portalCookie = "ketcode_project";
+export const projectIdPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/;
 export const accessPattern = /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}\.[A-Za-z0-9_-]{43}$/;
 
 export type Project = {
   id: string;
   name: string;
+  launch_due_at?: string | null;
+  launch_domain?: string | null;
+  launch_domain_type?: "existing" | "new" | null;
+  launch_email_type?: "mailbox" | "forwarding" | null;
+  launch_email_alias?: "info" | "contact" | "team" | null;
+  test_payment?: boolean;
+  contact_name?: string | null;
+  contact_phone?: string | null;
+  commercial_registration?: string | null;
+  fal_license?: string | null;
+  city?: string | null;
+  map_url?: string | null;
+  social_links?: string[];
+  working_hours?: string | null;
   template: "office" | "projects";
   stage: "received" | "building" | "review" | "paid" | "launched";
   preview_url: string | null;
@@ -16,16 +30,17 @@ export type Project = {
 
 export function portalEnabled() {
   return process.env.FACTORY_ENABLED === "true" &&
-    Boolean(process.env.FACTORY_SUPABASE_URL && process.env.FACTORY_SUPABASE_SECRET_KEY);
+    Boolean(process.env.FACTORY_SUPABASE_URL && process.env.FACTORY_SUPABASE_SECRET_KEY &&
+      process.env.FACTORY_SUPABASE_PUBLISHABLE_KEY);
 }
 
 export function newAccessCode() {
   return randomUUID() + "." + randomBytes(32).toString("base64url");
 }
 
-function accessQuery(code: string) {
-  const [id] = code.split(".");
-  return new URLSearchParams({ id: "eq." + id, access_hash: "eq." + hash(code) });
+function projectQuery(email: string, id?: string) {
+  const escapedEmail = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new URLSearchParams({ email: "imatch.^" + escapedEmail + "$", ...(id && { id: "eq." + id }) });
 }
 
 function hash(code: string) {
@@ -33,13 +48,16 @@ function hash(code: string) {
 }
 
 async function database(query: URLSearchParams, method = "GET", body?: object) {
-  if (!portalEnabled()) throw new Error("Portal is disabled");
+  const key = process.env.FACTORY_SUPABASE_SECRET_KEY;
+  if (!key || !portalEnabled()) throw new Error("Portal is disabled");
   const url = new URL("/rest/v1/white_friday_projects", process.env.FACTORY_SUPABASE_URL);
   url.search = query.toString();
   const response = await fetch(url, {
     method,
     headers: {
-      apikey: process.env.FACTORY_SUPABASE_SECRET_KEY!,
+      apikey: key,
+      // Legacy service_role keys are JWTs. Current secret keys use apikey alone.
+      ...(key.startsWith("eyJ") && { Authorization: "Bearer " + key }),
       "Content-Type": "application/json",
       Prefer: "return=representation",
     },
@@ -49,24 +67,41 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   });
   if (response.status === 409 && method === "POST") return [];
   if (!response.ok) throw new Error("Portal storage returned " + response.status);
-  return await response.json() as Project[];
+  return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours,launch_due_at,launch_domain,launch_domain_type,launch_email_alias,launch_email_type,test_payment";
 
-export async function findProject(code?: string) {
-  if (!code || !accessPattern.test(code)) return undefined;
-  const query = accessQuery(code);
+export async function listProjects(email: string) {
+  const query = projectQuery(email);
+  query.set("select", "id,name,template,stage");
+  query.set("order", "created_at.desc,id.desc");
+  return database(query);
+}
+
+export async function findProject(email: string, id: string) {
+  if (!projectIdPattern.test(id)) return undefined;
+  const query = projectQuery(email, id);
   query.set("select", projectColumns);
   return (await database(query))[0];
 }
 
-export async function createProject(code: string, name: string, email: string, template: Project["template"]) {
+type Contact = { contact_name: string; contact_phone: string };
+type Registration = {
+  commercial_registration: string;
+  fal_license: string;
+  city: string;
+  map_url: string | null;
+  social_links: string[];
+  working_hours: string | null;
+};
+
+export async function createProject(code: string, name: string, email: string, template: Project["template"], details: Contact & Registration) {
   const [id] = code.split(".");
   const rows = await database(new URLSearchParams({ select: projectColumns }), "POST", {
-    id, name, email, template, access_hash: hash(code),
+    id, name, email, template, access_hash: hash(code), ...details,
   });
-  return rows[0] ?? await findProject(code);
+  return rows[0] ?? await findProject(email, id);
 }
 
 export function safePreview(value: string | null) {
@@ -78,22 +113,103 @@ export function safePreview(value: string | null) {
   }
 }
 
-export async function approveProject(code: string, preview: string) {
-  if (!accessPattern.test(code) || !safePreview(preview)) return false;
-  const query = accessQuery(code);
+export async function approveProject(email: string, id: string, preview: string) {
+  if (!safePreview(preview)) return false;
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
   query.set("stage", "eq.review");
   query.set("preview_url", "eq." + preview);
   query.set("select", "id");
   return (await database(query, "PATCH", { approved_preview_url: preview })).length === 1;
 }
 
-export async function updateMaterials(code: string, referenceUrls: string[], logo?: { name: string; data: string }) {
-  if (!accessPattern.test(code)) return false;
-  const query = accessQuery(code);
+export async function updateMaterials(email: string, id: string, referenceUrls: string[], logo?: { name: string; data: string }) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
   query.set("stage", "in.(received,building)");
   query.set("select", "id");
   return (await database(query, "PATCH", {
     reference_urls: referenceUrls,
     ...(logo && { logo_name: logo.name, logo_data: logo.data }),
+  })).length === 1;
+}
+
+export async function updateProjectDetails(email: string, id: string, details: Contact | Registration) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
+  query.set("select", "id");
+  return (await database(query, "PATCH", details)).length === 1;
+}
+
+export async function updateLaunchDetails(email: string, id: string, details: {
+  launch_domain: string;
+  launch_domain_type: "existing" | "new";
+  launch_email_type: "mailbox" | "forwarding";
+  launch_email_alias: "info" | "contact" | "team";
+}) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = projectQuery(email, id);
+  query.set("stage", "eq.paid");
+  query.set("select", "id");
+  return (await database(query, "PATCH", details)).length === 1;
+}
+
+export async function listStaffProjects() {
+  return database(new URLSearchParams({
+    select: projectColumns + ",email",
+    order: "created_at.desc,id.desc",
+  }));
+}
+
+export async function getStaffProjectLogo(id: string) {
+  if (!projectIdPattern.test(id)) return undefined;
+  const rows = await database(new URLSearchParams({ id: "eq." + id, select: "logo_data" }));
+  return (rows[0] as { logo_data?: string } | undefined)?.logo_data;
+}
+
+export async function updateStaffProjectStage(id: string, action: "build" | "review" | "launch", preview?: string) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = new URLSearchParams({ id: "eq." + id, select: "id" });
+  if (action === "build") {
+    query.set("stage", "eq.received");
+    return (await database(query, "PATCH", { stage: "building" })).length === 1;
+  }
+  if (action === "review") {
+    if (!preview || !safePreview(preview)) return false;
+    query.set("stage", "in.(received,building)");
+    return (await database(query, "PATCH", { stage: "review", preview_url: preview })).length === 1;
+  }
+  const projects = await database(new URLSearchParams({ id: "eq." + id, select: projectColumns }));
+  const project = projects[0];
+  if (!project || project.stage !== "paid" || !project.preview_url ||
+      project.preview_url !== project.approved_preview_url || !project.launch_domain_type || !project.launch_email_type) return false;
+  query.set("stage", "eq.paid");
+  query.set("preview_url", "eq." + project.preview_url);
+  query.set("approved_preview_url", "eq." + project.preview_url);
+  return (await database(query, "PATCH", { stage: "launched" })).length === 1;
+}
+
+export async function recordStaffPayment(id: string, payment: { sessionId: string; test: boolean }) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = new URLSearchParams({
+    id: "eq." + id,
+    select: "stage,preview_url,approved_preview_url,stripe_checkout_session_id,test_payment",
+  });
+  const rows = await database(query) as (Project & { stripe_checkout_session_id?: string })[];
+  const project = rows[0];
+  if (!project) return false;
+  if (project.stage === "paid" || project.stage === "launched") {
+    return project.stripe_checkout_session_id === payment.sessionId && project.test_payment === payment.test;
+  }
+  if (project.stage !== "review" || !project.preview_url || project.preview_url !== project.approved_preview_url) return false;
+  query.set("stage", "eq.review");
+  query.set("preview_url", "eq." + project.preview_url);
+  query.set("approved_preview_url", "eq." + project.preview_url);
+  query.set("stripe_checkout_session_id", "is.null");
+  query.set("select", "id");
+  return (await database(query, "PATCH", {
+    stage: "paid",
+    test_payment: payment.test,
+    stripe_checkout_session_id: payment.sessionId,
   })).length === 1;
 }
