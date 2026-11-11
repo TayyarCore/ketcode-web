@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
         { source: "/websites/", destination: "/websites/index.html" },
         { source: "/templates", destination: "/templates/index.html" },
         { source: "/templates/", destination: "/templates/index.html" },
+        { source: "/templates/office", destination: "/templates/office/index.html" },
+        { source: "/templates/office/", destination: "/templates/office/index.html" },
         { source: "/templates/realestate", destination: "/templates/realestate/index.html" },
         { source: "/templates/realestate/", destination: "/templates/realestate/index.html" },
         { source: "/templates/clinic", destination: "/templates/clinic/index.html" },
