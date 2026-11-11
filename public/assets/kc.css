@@ -199,3 +199,15 @@ html .kc-chat-launcher{background:#171A33;color:#fff;border-color:transparent;bo
 html .kc-chat-launcher-mark{color:#171A33;font-family:var(--display)}
 html .kc-chat-brand-mark{background:var(--lamp);color:var(--lamp-ink);font-family:var(--display)}
 html[data-theme="dark"] .kc-chat-launcher{background:#3A4BE0}
+
+/* Legal pages */
+.legal-layout{max-width:46rem}
+.legal-page h1{font-size:clamp(2rem,4vw,2.8rem);margin-bottom:.6rem}
+.legal-updated{color:var(--muted);font-size:.95rem;margin-bottom:2.2rem}
+.prose-legal h2{font-family:var(--body);font-size:1.2rem;font-weight:600;margin:2.2rem 0 .6rem}
+.prose-legal p,.prose-legal li{color:var(--muted)}
+.prose-legal p+p{margin-top:.8rem}
+.prose-legal ul{padding-inline-start:1.3rem;margin:.6rem 0}
+.prose-legal li{margin:.35rem 0}
+.prose-legal strong{color:var(--ink);font-weight:600}
+.legal-link,.prose-legal a{color:var(--signal);text-underline-offset:4px}
