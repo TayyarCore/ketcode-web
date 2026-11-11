@@ -14,13 +14,16 @@ export const metadata: Metadata = {
 };
 export const dynamic = "force-dynamic";
 
-const stages: { id: Project["stage"]; title: string; next: string }[] = [
-  { id: "received", title: "استلمنا طلبك", next: "يمكنك متابعة حالة الطلب من هذه الصفحة." },
-  { id: "building", title: "نعمل على تجهيز موقعك", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المشاريع، جهّز اسم كل مشروع ونبذة عنه وصوره." },
-  { id: "review", title: "المعاينة جاهزة للمراجعة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
-  { id: "paid", title: "تم تأكيد الدفع", next: "أرسل اسم النطاق المطلوب واختر عنوان البريد الرسمي لتجهيز الإطلاق." },
-  { id: "launched", title: "تم إطلاق موقعك", next: "افتح رابط موقعك النهائي، وجرّب وسائل التواصل، ثم شارك الرابط مع عملائك." },
+const stages: { id: Project["stage"]; title: string; short: string; next: string }[] = [
+  { id: "received", title: "استلمنا طلبك", short: "الطلب", next: "سنراجع بياناتك ونبدأ التجهيز. أكمل بيانات مشروعك أدناه إن كان ينقصها شيء." },
+  { id: "building", title: "نعمل على تجهيز موقعك", short: "التجهيز", next: "جهّز شعارك إن وجد، ونبذة عن نشاطك وخدماتك، والصور وبيانات التواصل التي تريد عرضها. لقالب المطورين، جهّز اسم كل مشروع ونبذة عنه وصوره." },
+  { id: "review", title: "المعاينة جاهزة للمراجعة", short: "المعاينة", next: "افتح المعاينة وراجع النصوص والصور وروابط التواصل. إذا عندك تعديلات تواصل معنا، وإذا كانت جاهزة اضغط «اعتمد المعاينة»." },
+  { id: "paid", title: "تم تأكيد الدفع", short: "الدفع", next: "أرسل اسم النطاق المطلوب واختر عنوان البريد الرسمي لتجهيز الإطلاق." },
+  { id: "launched", title: "تم إطلاق موقعك", short: "الإطلاق", next: "افتح رابط موقعك النهائي، وجرّب وسائل التواصل، ثم شارك الرابط مع عملائك." },
 ];
+
+const templateName = (template: Project["template"]) =>
+  template === "office" ? "قالب منشآت التسويق العقاري" : "قالب منشآت المطورين العقاريين";
 
 const errors: Record<string, string> = {
   launch: "تعذّر حفظ بيانات الإطلاق. راجع اسم الدومين واختر طريقة توفيره ونوع البريد.",
@@ -33,6 +36,13 @@ const errors: Record<string, string> = {
   logo: "اختر صورة PNG أو JPG أو WebP بحجم لا يتجاوز 512 كيلوبايت.",
   materials: "تعذّر حفظ مواد الموقع. حاول مجددًا إذا كان مشروعك في مرحلة التجهيز.",
   unavailable: "تعذّرت متابعة الطلب الآن. حاول مرة أخرى بعد قليل.",
+};
+
+const saved: Record<string, string> = {
+  launch: "تم حفظ بيانات الإطلاق.",
+  business: "تم حفظ بيانات المنشأة.",
+  contact: "تم حفظ بيانات التواصل.",
+  materials: "تم حفظ مواد تجهيز موقعك.",
 };
 
 const sample: Project = {
@@ -59,8 +69,8 @@ function projectPaymentUrl(project: Project) {
 function ContactFields({ project }: { project?: Project }) {
   return (
     <>
-      <label>اسم العميل<input name="contact_name" autoComplete="name" maxLength={100} defaultValue={project?.contact_name ?? ""} required /></label>
-      <label>رقم الجوال<input name="contact_phone" type="tel" autoComplete="tel" maxLength={32} defaultValue={project?.contact_phone ?? ""} required dir="ltr" /></label>
+      <label>اسم المسؤول<input name="contact_name" autoComplete="name" maxLength={100} defaultValue={project?.contact_name ?? ""} required /></label>
+      <label>رقم الجوال<input name="contact_phone" type="tel" autoComplete="tel" maxLength={32} placeholder="05xxxxxxxx" defaultValue={project?.contact_phone ?? ""} required dir="ltr" /></label>
     </>
   );
 }
@@ -74,131 +84,160 @@ function BusinessFields({ project }: { project?: Project }) {
       <label>رابط موقع المكتب على الخريطة (اختياري)<input name="map_url" type="url" maxLength={2048} placeholder="https://maps.app.goo.gl/…" defaultValue={project?.map_url ?? ""} dir="ltr" /></label>
       <label>روابط حسابات التواصل الاجتماعي (اختياري)
         <textarea name="social_links" maxLength={10000} rows={3} defaultValue={project?.social_links?.join("\n") ?? ""} dir="ltr" />
-        <small>أضف رابطًا كاملًا لكل حساب في سطر مستقل، حتى 6 روابط.</small>
+        <small>رابط كامل لكل حساب في سطر مستقل، حتى 6 روابط.</small>
       </label>
       <label>ساعات العمل (اختياري)<textarea name="working_hours" maxLength={500} rows={2} placeholder="الأحد إلى الخميس، 9 صباحًا إلى 5 مساءً" defaultValue={project?.working_hours ?? ""} /></label>
     </>
   );
 }
 
+function TopBar({ email, staff, showProjects }: { email?: string; staff: boolean; showProjects: boolean }) {
+  return (
+    <header className={styles.topbar}>
+      <Link className={styles.brand} href="/"><img src="/assets/kc-mark.svg" alt="" width={30} height={30} />KetCode</Link>
+      <nav className={styles.nav} aria-label="البوابة">
+        {staff && <Link href="/portal/staff">طلبات العملاء</Link>}
+        {showProjects && <a href="/portal?view=projects">مشاريعي</a>}
+        {email && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
+      </nav>
+    </header>
+  );
+}
+
 function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
   const index = stages.findIndex(({ id }) => id === project.stage);
+  const current = stages[index] ?? stages[0];
   const preview = safePreview(project.preview_url);
   const approved = Boolean(preview && project.preview_url === project.approved_preview_url);
   const canEditMaterials = project.stage === "received" || project.stage === "building";
   const payment = approved && project.stage === "review" ? projectPaymentUrl(project) : undefined;
 
   return (
-    <section className={styles.card}>
-      <p className={styles.kicker}>{demo ? "معاينة ببيانات تجريبية" : "صفحة مشروعك"}</p>
-      <h1>{project.name}</h1>
-      <p>{project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
-      {!demo && (
-        <details open={!project.contact_name || !project.contact_phone}>
-          <summary>بيانات التواصل</summary>
-          <form className={styles.form} action={saveContact}>
-              <input type="hidden" name="project" value={project.id} />
-            <ContactFields project={project} />
-            <button className={styles.button} type="submit">احفظ بيانات التواصل</button>
-          </form>
-        </details>
-      )}
-      {!demo && (
-        <details open={!project.commercial_registration || !project.fal_license || !project.city}>
-          <summary>بيانات المنشأة</summary>
-          <form className={styles.form} action={saveBusiness}>
-            <input type="hidden" name="project" value={project.id} />
-            <BusinessFields project={project} />
-            <button className={styles.button} type="submit">احفظ بيانات المنشأة</button>
-          </form>
-        </details>
-      )}
-      {project.stage === "paid" && (
-        <section className={styles.materials}>
-          <h2>تجهيز الإطلاق الرسمي</h2>
-          {project.test_payment && <p>الدفع التجريبي مؤكد.</p>}
-          {project.launch_due_at ? <LaunchCountdown dueAt={project.launch_due_at} /> : (
-            <p role="status">بانتظار تجهيز الدومين. يبدأ العدّ التنازلي بعد تأكيد جاهزيته.</p>
-          )}
-          <form className={styles.form} action={saveLaunchDetails}>
-            <input type="hidden" name="project" value={project.id} />
-            <label>هل عندك دومين؟
-              <select name="launch_domain_type" defaultValue={project.launch_domain_type ?? ""} required>
-                <option value="" disabled>اختر طريقة توفير الدومين</option>
-                <option value="existing">عندي دومين وأحتاج ربطه</option>
-                <option value="new">أحتاج تسجيل دومين جديد</option>
-              </select>
-            </label>
-            <label>الدومين المطلوب
-              <input name="launch_domain" placeholder="example.com" defaultValue={project.launch_domain ?? ""} maxLength={253} required dir="ltr" />
-              <small>اكتب اسم النطاق الذي تملكه أو ترغب في استخدامه.</small>
-            </label>
-            <label>البريد الرسمي
-              <select name="launch_email_alias" defaultValue={project.launch_email_alias ?? "info"} dir="ltr">
-                {["info", "contact", "team"].map((alias) => <option key={alias} value={alias}>{alias}@{project.launch_domain ?? "example.com"}</option>)}
-              </select>
-            </label>
-            <label>نوع البريد الرسمي
-              <select name="launch_email_type" defaultValue={project.launch_email_type ?? ""} required>
-                <option value="" disabled>اختر نوع البريد</option>
-                <option value="mailbox">صندوق بريد مستقل</option>
-                <option value="forwarding">تحويل الرسائل إلى بريد قائم</option>
-              </select>
-            </label>
-            <button className={styles.button} type="submit">احفظ بيانات الإطلاق</button>
-          </form>
-        </section>
-      )}
-      <h2>المطلوب منك في كل مرحلة</h2>
-      <ol className={styles.steps}>
-        {stages.map(({ id, title, next }, i) => (
-          <li key={id} aria-current={i === index ? "step" : undefined} data-reached={i <= index}>
-            <span aria-hidden="true">{i + 1}</span>
-            <div>
-              <strong>{title}</strong>
-              <p>{id === "review" && approved && project.stage === "review" ? "اعتمدت المعاينة. تابع إلى الدفع عند ظهور الزر." : next}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      {canEditMaterials && (
-        <section className={styles.materials}>
-          <h2>مواد تجهيز موقعك</h2>
-          <form className={styles.form} action={demo ? undefined : saveMaterials}>
-              <input type="hidden" name="project" value={project.id} />
-            <label>
-              روابط مواقع أعجبتني (اختياري)
-              <textarea name="references" disabled={demo} dir="ltr" rows={3} maxLength={1600}
-                placeholder="https://example.com" defaultValue={project.reference_urls.join("\n")} />
-              <small>أضف حتى 5 روابط، كل رابط في سطر مستقل.</small>
-            </label>
-            <label>
-              رفع الشعار (اختياري)
-              <input name="logo" type="file" disabled={demo} accept="image/png,image/jpeg,image/webp" />
-              <small>PNG أو JPG أو WebP، حتى 512 كيلوبايت.</small>
-            </label>
-            {project.logo_name && <p>الشعار المحفوظ <bdi>{project.logo_name}</bdi></p>}
-            {demo ? <p>هذه معاينة لشكل الحقول. الحفظ متاح بعد تفعيل التسجيل.</p> :
-              <button className={styles.button} type="submit">احفظ مواد الموقع</button>}
-          </form>
-        </section>
-      )}
-      {preview && (
-        <div className={styles.actions}>
-          <a className={styles.button} href={preview} target="_blank" rel="noopener noreferrer">{project.stage === "launched" ? "افتح موقعك ↗" : "افتح معاينة موقعك ↗"}</a>
-          {project.stage === "review" && !approved && (
-            <form action={acceptPreview}>
-              <input type="hidden" name="project" value={project.id} />
-              <input type="hidden" name="preview" value={project.preview_url ?? ""} />
-              <button className={styles.button} type="submit">اعتمد المعاينة</button>
-            </form>
-          )}
-          {approved && project.stage === "review" && (
-            <p>{payment ? <a className={styles.button} href={payment} target="_blank" rel="noopener noreferrer">ادفع 799 ريال لإطلاق الموقع (تجريبي)</a> : "تم اعتماد المعاينة. بانتظار تفعيل الدفع."}</p>
-          )}
+    <>
+      <section className={styles.card}>
+        <div className={styles.head}>
+          <div>
+            <p className={styles.kicker}>{demo ? "معاينة ببيانات تجريبية" : "مشروعك"}</p>
+            <h1>{project.name}</h1>
+            <p className={styles.muted}>{templateName(project.template)}</p>
+          </div>
+          <span className={styles.badge} data-stage={project.stage}>{current.title}</span>
         </div>
+        <ol className={styles.steps} aria-label="مراحل المشروع">
+          {stages.map(({ id, short }, i) => (
+            <li key={id} aria-current={i === index ? "step" : undefined} data-reached={i < index}>
+              <span aria-hidden="true">{i + 1}</span>{short}
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className={styles.card + " " + styles.now} aria-labelledby="now-title">
+        <h2 id="now-title">المطلوب الآن</h2>
+        <p>{project.stage === "review" && approved ? "اعتمدت المعاينة. أكمل الدفع لنبدأ تجهيز الإطلاق." : current.next}</p>
+
+        {preview && (
+          <div className={styles.actions}>
+            <a className={styles.button + (project.stage === "review" && !approved ? " " + styles.buttonGhost : "")} href={preview} target="_blank" rel="noopener noreferrer">
+              {project.stage === "launched" ? "افتح موقعك" : "افتح معاينة موقعك"}
+            </a>
+            {project.stage === "review" && !approved && (
+              <form action={acceptPreview}>
+                <input type="hidden" name="project" value={project.id} />
+                <input type="hidden" name="preview" value={project.preview_url ?? ""} />
+                <button className={styles.button} type="submit">اعتمد المعاينة</button>
+              </form>
+            )}
+            {approved && project.stage === "review" && payment && (
+              <a className={styles.button + " " + styles.buttonPay} href={payment} target="_blank" rel="noopener noreferrer">ادفع 799 ريال لإطلاق الموقع (تجريبي)</a>
+            )}
+          </div>
+        )}
+        {approved && project.stage === "review" && !payment && <p className={styles.note}>تم اعتماد المعاينة. بانتظار تفعيل الدفع.</p>}
+
+        {canEditMaterials && (
+          <div className={styles.materials}>
+            <h3>مواد تجهيز موقعك</h3>
+            <form className={styles.form} action={demo ? undefined : saveMaterials}>
+              <input type="hidden" name="project" value={project.id} />
+              <label>
+                روابط مواقع أعجبتني (اختياري)
+                <textarea name="references" disabled={demo} dir="ltr" rows={3} maxLength={1600}
+                  placeholder="https://example.com" defaultValue={project.reference_urls.join("\n")} />
+                <small>حتى 5 روابط، كل رابط في سطر مستقل.</small>
+              </label>
+              <label className={styles.full}>
+                رفع الشعار (اختياري)
+                <input name="logo" type="file" disabled={demo} accept="image/png,image/jpeg,image/webp" />
+                <small>PNG أو JPG أو WebP، حتى 512 كيلوبايت.</small>
+              </label>
+              {project.logo_name && <p>الشعار المحفوظ: <bdi>{project.logo_name}</bdi></p>}
+              {demo ? <p className={styles.note}>هذه معاينة لشكل الحقول. الحفظ متاح بعد تفعيل التسجيل.</p> :
+                <button className={styles.button} type="submit">احفظ مواد الموقع</button>}
+            </form>
+          </div>
+        )}
+
+        {project.stage === "paid" && (
+          <div className={styles.materials}>
+            <h3>تجهيز الإطلاق الرسمي</h3>
+            {project.test_payment && <p className={styles.muted}>الدفع التجريبي مؤكد.</p>}
+            {project.launch_due_at ? <LaunchCountdown dueAt={project.launch_due_at} /> : (
+              <p className={styles.note} role="status">بانتظار تجهيز الدومين. يبدأ العدّ التنازلي بعد تأكيد جاهزيته.</p>
+            )}
+            <form className={styles.form} action={saveLaunchDetails}>
+              <input type="hidden" name="project" value={project.id} />
+              <label>هل عندك دومين؟
+                <select name="launch_domain_type" defaultValue={project.launch_domain_type ?? ""} required>
+                  <option value="" disabled>اختر طريقة توفير الدومين</option>
+                  <option value="existing">عندي دومين وأحتاج ربطه</option>
+                  <option value="new">أحتاج تسجيل دومين جديد</option>
+                </select>
+              </label>
+              <label>الدومين المطلوب
+                <input name="launch_domain" placeholder="example.com" defaultValue={project.launch_domain ?? ""} maxLength={253} required dir="ltr" />
+              </label>
+              <label>البريد الرسمي
+                <select name="launch_email_alias" defaultValue={project.launch_email_alias ?? "info"} dir="ltr">
+                  {["info", "contact", "team"].map((alias) => <option key={alias} value={alias}>{alias}@{project.launch_domain ?? "example.com"}</option>)}
+                </select>
+              </label>
+              <label>نوع البريد الرسمي
+                <select name="launch_email_type" defaultValue={project.launch_email_type ?? ""} required>
+                  <option value="" disabled>اختر نوع البريد</option>
+                  <option value="mailbox">صندوق بريد مستقل</option>
+                  <option value="forwarding">تحويل الرسائل إلى بريد قائم</option>
+                </select>
+              </label>
+              <button className={styles.button} type="submit">احفظ بيانات الإطلاق</button>
+            </form>
+          </div>
+        )}
+      </section>
+
+      {!demo && (
+        <section className={styles.card}>
+          <h2>بيانات مشروعك</h2>
+          <p className={styles.lede}>نستخدمها في موقعك وللتواصل معك بخصوص الطلب.</p>
+          <details className={styles.details} open={!project.contact_name || !project.contact_phone}>
+            <summary>بيانات التواصل</summary>
+            <form className={styles.form} action={saveContact}>
+              <input type="hidden" name="project" value={project.id} />
+              <ContactFields project={project} />
+              <button className={styles.button} type="submit">احفظ بيانات التواصل</button>
+            </form>
+          </details>
+          <details className={styles.details} open={!project.commercial_registration || !project.fal_license || !project.city}>
+            <summary>بيانات المنشأة</summary>
+            <form className={styles.form} action={saveBusiness}>
+              <input type="hidden" name="project" value={project.id} />
+              <BusinessFields project={project} />
+              <button className={styles.button} type="submit">احفظ بيانات المنشأة</button>
+            </form>
+          </details>
+        </section>
       )}
-    </section>
+    </>
   );
 }
 
@@ -221,54 +260,55 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const error = projects === null || project === null ? errors.unavailable
     : selected && !project ? errors.access
     : Object.hasOwn(errors, params.error ?? "") ? errors[params.error ?? ""] : undefined;
+  const savedMessage = project && Object.hasOwn(saved, params.saved ?? "") ? saved[params.saved ?? ""] : undefined;
+  const staff = Boolean(email && isFactoryStaff(email));
 
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
-        <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
-        {email && isFactoryStaff(email) && <p><Link href="/portal/staff">طلبات العملاء</Link></p>}
+        <TopBar email={email} staff={staff} showProjects={Boolean(email && projects && projects.length > 0 && (project || showNew))} />
         {error && <p className={styles.error} role="alert">{error}</p>}
-        {project && params.saved === "launch" && <p role="status">تم حفظ بيانات الإطلاق.</p>}
-        {project && params.saved === "business" && <p role="status">تم حفظ بيانات المنشأة.</p>}
-        {project && params.saved === "contact" && <p role="status">تم حفظ بيانات التواصل.</p>}
-        {project && params.saved === "materials" && <p role="status">تم حفظ مواد تجهيز موقعك.</p>}
-        {email && <form action={closeProject}><button className={styles.secondary} type="submit">تسجيل الخروج</button></form>}
-        {email && projects && projects.length > 0 && (project || showNew) &&
-          <p><a href="/portal?view=projects">مشاريعي</a></p>}
+        {savedMessage && <p className={styles.status} role="status">{savedMessage}</p>}
         {project ? <ProjectView project={project} demo={demo} /> : projects === null ? null
           : projects.length > 0 && !showNew ? (
             <section className={styles.card}>
               <h1>مشاريعي</h1>
-              <ul>
+              <ul className={styles.list}>
                 {projects.map(({ id, name, stage }) => (
-                  <li key={id}><a href={"/portal?project=" + id}>{name}</a> · {stages.find((item) => item.id === stage)?.title}</li>
+                  <li key={id}><a href={"/portal?project=" + id}><span>{name}</span><span className={styles.badge} data-stage={stage}>{stages.find((item) => item.id === stage)?.title}</span></a></li>
                 ))}
               </ul>
               <a className={styles.button} href="/portal?view=new">اطلب موقعًا جديدًا</a>
             </section>
           ) : (
-          <>
             <section className={styles.card}>
-              <p className={styles.kicker}>من الطلب إلى الإطلاق</p>
               <h1>ابدأ طلب موقعك</h1>
-              <p>بعد التسجيل تفتح صفحة مشروعك مباشرة، ومنها تتابع التجهيز وتعتمد المعاينة.</p>
+              <p className={styles.lede}>بعد التسجيل تفتح صفحة مشروعك مباشرة، ومنها تتابع التجهيز وتراجع المعاينة وتعتمدها قبل الدفع.</p>
               {enabled ? (
                 <form className={styles.form} action={registerProject}>
                   <input type="hidden" name="code" value={newAccessCode()} />
-                  <label>اسم المكتب أو المنشأة<input name="name" autoComplete="organization" maxLength={100} required /></label>
-                  <ContactFields />
-                  <BusinessFields />
-                  <p>بريد متابعة الطلب <bdi>{email}</bdi></p>
-                  <label>القالب<select name="template"><option value="office">قالب المكتب العقاري</option><option value="projects">قالب المشاريع المتعددة</option></select></label>
-                  <label className={styles.check}><input type="checkbox" name="consent" required /> أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</label>
+                  <div className={styles.fieldset}>
+                    <h3>المنشأة</h3>
+                    <label>اسم المكتب أو المنشأة<input name="name" autoComplete="organization" maxLength={100} required /></label>
+                    <label>القالب<select name="template"><option value="office">{templateName("office")}</option><option value="projects">{templateName("projects")}</option></select></label>
+                  </div>
+                  <div className={styles.fieldset}>
+                    <h3>التواصل</h3>
+                    <ContactFields />
+                    <p className={styles.muted}>بريد متابعة الطلب: <bdi>{email}</bdi></p>
+                  </div>
+                  <div className={styles.fieldset}>
+                    <h3>الترخيص والعنوان</h3>
+                    <BusinessFields />
+                  </div>
+                  <label className={styles.check}><input type="checkbox" name="consent" required /><span>أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</span></label>
                   <button className={styles.button} type="submit">سجّل وافتح صفحة مشروعك</button>
                 </form>
               ) : (
-                <p>التسجيل غير متاح في هذه النسخة. {canDemo && <a href="/portal?demo=1">شاهد نموذج صفحة المشروع</a>}</p>
+                <p className={styles.note}>التسجيل غير متاح في هذه النسخة. {canDemo && <a href="/portal?demo=1">شاهد نموذج صفحة المشروع</a>}</p>
               )}
             </section>
-          </>
-        )}
+          )}
       </div>
     </main>
   );

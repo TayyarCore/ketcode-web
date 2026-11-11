@@ -33,14 +33,16 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
   return (
     <main className={styles.page}>
       <div className={styles.wrap + " " + board.wrap}>
-        <header>
-          <Link href="/portal?view=projects">مشاريعي</Link>
-          <form action={closeProject}><button type="submit" className={styles.secondary}>تسجيل الخروج</button></form>
+        <header className={styles.topbar}>
+          <Link className={styles.brand} href="/"><img src="/assets/kc-mark.svg" alt="" width={30} height={30} />KetCode</Link>
+          <nav className={styles.nav} aria-label="البوابة">
+            <Link href="/portal?view=projects">مشاريعي</Link>
+            <form action={closeProject}><button type="submit" className={styles.secondary}>تسجيل الخروج</button></form>
+          </nav>
         </header>
         <section className={styles.card}>
-          <p className={styles.kicker}>Ketcode</p>
           <h1>طلبات العملاء</h1>
-          {params.saved && <p role="status">{params.saved === "payment" ? "تم تأكيد الدفع وربطه بالطلب." : "تم تحديث الطلب."}</p>}
+          {params.saved && <p className={styles.status} role="status">{params.saved === "payment" ? "تم تأكيد الدفع وربطه بالطلب." : "تم تحديث الطلب."}</p>}
           {(params.error || projects === null) && <p role="alert" className={styles.error}>{params.error === "payment" ? "تعذّر تأكيد الدفع. تحقق من معرّف جلسة Stripe وإعدادات الربط وحالة الطلب." : "تعذّر إتمام الطلب. حدّث الصفحة وحاول مرة أخرى."}</p>}
           {projects?.length === 0 && <p>لا توجد طلبات حاليًا.</p>}
         </section>
@@ -57,8 +59,8 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
                   {orders.map((project) => (
                     <article key={project.id} className={styles.card + " " + board.order}>
                       <h3>{project.name}</h3>
-                      {project.test_payment && <p>دفع تجريبي</p>}
-                      <p>{nextStep(project)}</p>
+                      {project.test_payment && <span className={board.test}>دفع تجريبي</span>}
+                      <p className={styles.muted}>{nextStep(project)}</p>
                       {project.stage === "review" && project.preview_url && project.preview_url === project.approved_preview_url && (
                         <form className={styles.form} action={confirmPayment}>
                           <input type="hidden" name="project" value={project.id} />
@@ -69,7 +71,7 @@ export default async function StaffPortal({ searchParams }: { searchParams: Prom
                       <details>
                         <summary>بيانات الطلب</summary>
                         <p>{project.contact_name} · <bdi>{project.email}</bdi>{project.contact_phone && <> · <bdi>{project.contact_phone}</bdi></>}</p>
-                        <p>{project.city} · {project.template === "office" ? "قالب المكتب العقاري" : "قالب المشاريع المتعددة"}</p>
+                        <p>{project.city} · {project.template === "office" ? "منشآت التسويق العقاري" : "منشآت المطورين العقاريين"}</p>
                         {project.commercial_registration && <p>السجل التجاري <bdi>{project.commercial_registration}</bdi></p>}
                         {project.fal_license && <p>ترخيص فال <bdi>{project.fal_license}</bdi></p>}
                         {project.working_hours && <p>ساعات العمل {project.working_hours}</p>}

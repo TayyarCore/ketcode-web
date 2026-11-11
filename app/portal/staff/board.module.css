@@ -1,14 +1,17 @@
-.wrap { width: min(100% - 32px, 1640px); }
-.lanes { display: grid; grid-template-columns: repeat(5, minmax(215px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 12px; }
-.lane { padding: 12px; border: 1px solid #d8e6e0; border-radius: 16px; background: #eaf2ee; min-height: 200px; }
-.laneHeader { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; }
-.laneHeader h2 { font-weight: 800; }
-.laneHeader span { min-width: 28px; padding-inline: 6px; border-radius: 100px; background: #d4e8df; text-align: center; }
-.empty { font-size: .85rem; color: #516967; }
-.order { padding: 14px; border-radius: 12px; overflow-wrap: anywhere; }
-.order h3 { font-weight: 800; line-height: 1.4; }
-.order summary { cursor: pointer; font-weight: 700; margin-top: 8px; }
-@media (max-width: 640px) {
-  .lanes { grid-template-columns: repeat(5, minmax(220px, 76vw)); scroll-snap-type: x proximity; }
-  .lane { scroll-snap-align: start; }
+.wrap{width:min(100% - 32px,1640px)}
+.lanes{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:12px;overflow-x:auto;padding-bottom:12px}
+.lane{padding:12px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--line) 35%,var(--paper));min-height:220px}
+.laneHeader{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;padding:2px 4px}
+.laneHeader h2{font-size:1rem}
+.laneHeader span{min-width:28px;padding-inline:8px;border-radius:999px;background:var(--ink);color:#fff;text-align:center;font-size:.85rem;font-weight:600}
+.empty{font-size:.85rem;color:var(--muted);padding:4px}
+.order{padding:14px;border-radius:14px;overflow-wrap:anywhere;margin-bottom:10px}
+.order h3{line-height:1.5}
+.order p{font-size:.92rem}
+.order summary{cursor:pointer;font-weight:600;margin-top:8px;font-size:.92rem}
+.order .form{grid-template-columns:1fr;margin-top:.8rem}
+.test{display:inline-block;font-size:.78rem;font-weight:600;border-radius:999px;padding:.05rem .6rem;background:color-mix(in srgb,var(--lamp) 30%,#fff);color:var(--lamp-ink);margin:.3rem 0}
+@media (max-width:640px){
+  .lanes{grid-template-columns:repeat(5,minmax(230px,80vw));scroll-snap-type:x proximity}
+  .lane{scroll-snap-align:start}
 }
