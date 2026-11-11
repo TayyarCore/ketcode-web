@@ -19,9 +19,9 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 ];
 
 const errors: Record<string, string> = {
-  business: "تعذّر حفظ بيانات المنشأة. تحقق من رقمي السجل التجاري وترخيص فال.",
+  business: "تعذّر حفظ بيانات المنشأة. راجع الأرقام والمدينة وتأكد أن الروابط تبدأ بـ https://.",
   contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
-  registration: "راجع بيانات الطلب، وأدخل رقم السجل التجاري ورقم ترخيص فال بالأرقام، ثم أعد المحاولة.",
+  registration: "راجع بيانات الطلب والأرقام والمدينة وروابط الموقع، ثم أعد المحاولة.",
   access: "تعذّر فتح المشروع. اختر مشروعًا من حسابك.",
   preview: "تعذّر اعتماد هذه المعاينة. حدّث الصفحة وتحقق من أحدث نسخة.",
   references: "أدخل حتى 5 روابط صحيحة، كل رابط في سطر مستقل.",
@@ -65,6 +65,13 @@ function BusinessFields({ project }: { project?: Project }) {
     <>
       <label>رقم السجل التجاري<input name="commercial_registration" inputMode="numeric" maxLength={30} defaultValue={project?.commercial_registration ?? ""} required dir="ltr" /></label>
       <label>رقم ترخيص فال<input name="fal_license" inputMode="numeric" maxLength={30} defaultValue={project?.fal_license ?? ""} required dir="ltr" /></label>
+      <label>المدينة<input name="city" autoComplete="address-level2" maxLength={100} defaultValue={project?.city ?? ""} required /></label>
+      <label>رابط موقع المكتب على الخريطة (اختياري)<input name="map_url" type="url" maxLength={2048} placeholder="https://maps.app.goo.gl/…" defaultValue={project?.map_url ?? ""} dir="ltr" /></label>
+      <label>روابط حسابات التواصل الاجتماعي (اختياري)
+        <textarea name="social_links" maxLength={10000} rows={3} defaultValue={project?.social_links?.join("\n") ?? ""} dir="ltr" />
+        <small>أضف رابطًا كاملًا لكل حساب في سطر مستقل، حتى 6 روابط.</small>
+      </label>
+      <label>ساعات العمل (اختياري)<textarea name="working_hours" maxLength={500} rows={2} placeholder="الأحد إلى الخميس، 9 صباحًا إلى 5 مساءً" defaultValue={project?.working_hours ?? ""} /></label>
     </>
   );
 }
@@ -92,7 +99,7 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
         </details>
       )}
       {!demo && (
-        <details open={!project.commercial_registration || !project.fal_license}>
+        <details open={!project.commercial_registration || !project.fal_license || !project.city}>
           <summary>بيانات المنشأة</summary>
           <form className={styles.form} action={saveBusiness}>
             <input type="hidden" name="project" value={project.id} />
@@ -205,7 +212,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
                   <label>اسم المكتب أو المنشأة<input name="name" autoComplete="organization" maxLength={100} required /></label>
                   <ContactFields />
                   <BusinessFields />
-                  <p>البريد المسجّل <bdi>{email}</bdi></p>
+                  <p>بريد متابعة الطلب <bdi>{email}</bdi></p>
                   <label>القالب<select name="template"><option value="office">قالب المكتب العقاري</option><option value="projects">قالب المشاريع المتعددة</option></select></label>
                   <label className={styles.check}><input type="checkbox" name="consent" required /> أوافق على استخدام بياناتي لمتابعة الطلب وفق <a href="/privacy">سياسة الخصوصية</a>.</label>
                   <button className={styles.button} type="submit">سجّل وافتح صفحة مشروعك</button>

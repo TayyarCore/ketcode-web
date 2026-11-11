@@ -10,6 +10,10 @@ export type Project = {
   contact_phone?: string | null;
   commercial_registration?: string | null;
   fal_license?: string | null;
+  city?: string | null;
+  map_url?: string | null;
+  social_links?: string[];
+  working_hours?: string | null;
   template: "office" | "projects";
   stage: "received" | "building" | "review" | "paid" | "launched";
   preview_url: string | null;
@@ -60,7 +64,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours";
 
 export async function listProjects(email: string) {
   const query = projectQuery(email);
@@ -77,7 +81,14 @@ export async function findProject(email: string, id: string) {
 }
 
 type Contact = { contact_name: string; contact_phone: string };
-type Registration = { commercial_registration: string; fal_license: string };
+type Registration = {
+  commercial_registration: string;
+  fal_license: string;
+  city: string;
+  map_url: string | null;
+  social_links: string[];
+  working_hours: string | null;
+};
 
 export async function createProject(code: string, name: string, email: string, template: Project["template"], details: Contact & Registration) {
   const [id] = code.split(".");

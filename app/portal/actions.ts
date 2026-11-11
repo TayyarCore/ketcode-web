@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requirePortalEmail, signOut } from "../../lib/factory/auth";
 import { isRateLimited } from "../../lib/rate-limit";
-import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, updateProjectDetails, updateMaterials } from "../../lib/factory/portal";
+import { accessPattern, approveProject, createProject, portalEnabled, projectIdPattern, safePreview, updateProjectDetails, updateMaterials } from "../../lib/factory/portal";
 
 const contact = z.object({
   contact_name: z.string().trim().min(2).max(100),
@@ -19,9 +19,16 @@ const registrationNumber = z.string().trim().transform((value) =>
   value.replace(/[٠-٩۰-۹]/g, (digit) => String(digit.charCodeAt(0) & 15)))
   .pipe(z.string().regex(/^\d{1,30}$/));
 
+const websiteUrl = z.string().max(2048).transform((value) => safePreview(value)).pipe(z.string().max(2048));
+
 const business = z.object({
   commercial_registration: registrationNumber,
   fal_license: registrationNumber,
+  city: z.string().trim().min(2).max(100),
+  map_url: z.string().trim().pipe(z.union([z.literal(""), websiteUrl])).transform((value) => value || null),
+  social_links: z.string().max(10000).transform((value) => value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean))
+    .pipe(z.array(websiteUrl).max(6)),
+  working_hours: z.string().trim().max(500).transform((value) => value || null),
 });
 
 const registration = contact.extend({
@@ -52,8 +59,8 @@ export async function registerProject(form: FormData) {
   if (!portalEnabled() || await limited("register")) redirect("/portal?error=unavailable");
   const parsed = registration.safeParse(Object.fromEntries(form));
   if (!parsed.success) redirect("/portal?error=registration");
-  const { code, name, template, contact_name, contact_phone, commercial_registration, fal_license } = parsed.data;
-  const project = await createProject(code, name, email, template, { contact_name, contact_phone, commercial_registration, fal_license }).catch(() => undefined);
+  const { code, name, template, contact_name, contact_phone, commercial_registration, fal_license, city, map_url, social_links, working_hours } = parsed.data;
+  const project = await createProject(code, name, email, template, { contact_name, contact_phone, commercial_registration, fal_license, city, map_url, social_links, working_hours }).catch(() => undefined);
   if (!project) redirect("/portal?error=unavailable");
   redirect(projectPath(project.id));
 }
