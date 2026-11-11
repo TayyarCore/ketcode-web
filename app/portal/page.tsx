@@ -20,7 +20,7 @@ const stages: { id: Project["stage"]; title: string; next: string }[] = [
 ];
 
 const errors: Record<string, string> = {
-  launch: "تعذّر حفظ بيانات الإطلاق. أدخل نطاقًا مثل example.com واختر عنوان البريد.",
+  launch: "تعذّر حفظ بيانات الإطلاق. راجع اسم الدومين واختر طريقة توفيره ونوع البريد.",
   business: "تعذّر حفظ بيانات المنشأة. راجع الأرقام والمدينة وتأكد أن الروابط تبدأ بـ https://.",
   contact: "تعذّر حفظ بيانات التواصل. راجع الاسم ورقم الجوال وحاول مرة أخرى.",
   registration: "راجع بيانات الطلب والأرقام والمدينة وروابط الموقع، ثم أعد المحاولة.",
@@ -117,6 +117,13 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
           {project.launch_due_at ? <LaunchCountdown dueAt={project.launch_due_at} /> : (\n            <p role="status">بانتظار تجهيز الدومين. يبدأ العدّ التنازلي بعد تأكيد جاهزيته.</p>\n          )}
           <form className={styles.form} action={saveLaunchDetails}>
             <input type="hidden" name="project" value={project.id} />
+            <label>هل عندك دومين؟
+              <select name="launch_domain_type" defaultValue={project.launch_domain_type ?? ""} required>
+                <option value="" disabled>اختر طريقة توفير الدومين</option>
+                <option value="existing">عندي دومين وأحتاج ربطه</option>
+                <option value="new">أحتاج تسجيل دومين جديد</option>
+              </select>
+            </label>
             <label>الدومين المطلوب
               <input name="launch_domain" placeholder="example.com" defaultValue={project.launch_domain ?? ""} maxLength={253} required dir="ltr" />
               <small>اكتب اسم النطاق الذي تملكه أو ترغب في استخدامه.</small>
@@ -124,6 +131,13 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
             <label>البريد الرسمي
               <select name="launch_email_alias" defaultValue={project.launch_email_alias ?? "info"} dir="ltr">
                 {["info", "contact", "team"].map((alias) => <option key={alias} value={alias}>{alias}@{project.launch_domain ?? "example.com"}</option>)}
+              </select>
+            </label>
+            <label>نوع البريد الرسمي
+              <select name="launch_email_type" defaultValue={project.launch_email_type ?? ""} required>
+                <option value="" disabled>اختر نوع البريد</option>
+                <option value="mailbox">صندوق بريد مستقل</option>
+                <option value="forwarding">تحويل الرسائل إلى بريد قائم</option>
               </select>
             </label>
             <button className={styles.button} type="submit">احفظ بيانات الإطلاق</button>

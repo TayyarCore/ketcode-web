@@ -8,6 +8,8 @@ export type Project = {
   name: string;
   launch_due_at?: string | null;
   launch_domain?: string | null;
+  launch_domain_type?: "existing" | "new" | null;
+  launch_email_type?: "mailbox" | "forwarding" | null;
   launch_email_alias?: "info" | "contact" | "team" | null;
   test_payment?: boolean;
   contact_name?: string | null;
@@ -68,7 +70,7 @@ async function database(query: URLSearchParams, method = "GET", body?: object) {
   return await response.json() as (Project & { email: string })[];
 }
 
-const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours,launch_due_at,launch_domain,launch_email_alias,test_payment";
+const projectColumns = "id,name,template,stage,preview_url,approved_preview_url,reference_urls,logo_name,contact_name,contact_phone,commercial_registration,fal_license,city,map_url,social_links,working_hours,launch_due_at,launch_domain,launch_domain_type,launch_email_alias,launch_email_type,test_payment";
 
 export async function listProjects(email: string) {
   const query = projectQuery(email);
@@ -141,6 +143,8 @@ export async function updateProjectDetails(email: string, id: string, details: C
 
 export async function updateLaunchDetails(email: string, id: string, details: {
   launch_domain: string;
+  launch_domain_type: "existing" | "new";
+  launch_email_type: "mailbox" | "forwarding";
   launch_email_alias: "info" | "contact" | "team";
 }) {
   if (!projectIdPattern.test(id)) return false;

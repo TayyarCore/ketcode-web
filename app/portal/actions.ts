@@ -133,6 +133,8 @@ export async function saveBusiness(form: FormData) {
 const launchDetails = z.object({
   launch_domain: z.string().trim().toLowerCase().max(253)
     .regex(/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/),
+  launch_domain_type: z.enum(["existing", "new"]),
+  launch_email_type: z.enum(["mailbox", "forwarding"]),
   launch_email_alias: z.enum(["info", "contact", "team"]),
 });
 
