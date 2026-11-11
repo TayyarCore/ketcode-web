@@ -39,6 +39,14 @@ const challenges = [
   { title: "رابط واحد يختصر الخطوات", text: "مكان مرتب للتعريف بالشركة وعرض خدماتها وتوجيه العميل إلى وسيلة التواصل المناسبة." },
 ];
 
+const trust = [
+  { title: "تشاهد قبل أن تدفع", text: "نجهّز معاينة كاملة باسم منشأتك، ولا تدفع إلا بعد أن تعتمدها." },
+  { title: "اتفاق مكتوب قبل الدفع", text: "نطاق العمل وأي خدمات إضافية أو تكاليف دورية تُوضَّح كتابةً قبل أن تلتزم بشيء." },
+  { title: "موقعك ومحتواك ملكك", text: "النصوص والصور وبيانات منشأتك ملكك، ويُسجَّل النطاق باسم منشأتك." },
+  { title: "جاهز لمتطلبات الإعلان العقاري", text: "يعرض الموقع رخصة فال والسجل التجاري بعد التحقق منهما، ليثق بك عميلك من أول زيارة." },
+  { title: "تتعامل مع الفريق مباشرة", text: "تواصل عبر واتساب مع من ينفّذ موقعك، دون وسطاء أو نماذج طويلة." },
+];
+
 const steps = [
   { title: "اختر القالب", text: "قالب منشآت التسويق العقاري أو قالب المطورين العقاريين." },
   { title: "شارك بيانات منشأتك", text: "الاسم والشعار والخدمات ووسائل التواصل." },
@@ -61,7 +69,7 @@ export default function RealEstateOfferPage() {
     <header className={styles.header}>
       <div className={styles.wrap + " " + styles.nav}>
         <Link href="/" className={styles.logo} aria-label="العودة إلى Ketcode">KetCode</Link>
-        <nav className={styles.links} aria-label="أقسام الصفحة"><a href="#templates">القوالب</a><a href="#steps">طريقة العمل</a><a href="#faq">الأسئلة</a></nav>
+        <nav className={styles.links} aria-label="أقسام الصفحة"><a href="#templates">القوالب</a><a href="#why">لماذا نحن</a><a href="#steps">طريقة العمل</a><a href="#faq">الأسئلة</a></nav>
         <a className={styles.navAction} href={whatsapp} target="_blank" rel="noopener noreferrer">احجز مكانك</a>
       </div>
     </header>
@@ -122,6 +130,11 @@ export default function RealEstateOfferPage() {
     <section id="steps" className={styles.section + " " + styles.band}><div className={styles.wrap}>
       <div className={styles.sectionHead}><h2>من الطلب إلى الموقع</h2><p>تبدأ بقالب تراه، وتدفع بعد أن تعتمد المعاينة باسم منشأتك.</p></div>
       <ol className={styles.steps}>{steps.map((s) => <li key={s.title} className={styles.step}><h3>{s.title}</h3><p>{s.text}</p></li>)}</ol>
+    </div></section>
+
+    <section id="why" className={styles.section}><div className={styles.wrap + " " + styles.problem}>
+      <div><h2>لماذا Ketcode؟</h2><p style={{marginTop: "1rem"}}>نبني موقعك بطريقة تحمي قرارك: ترى العمل قبل الدفع، وتعرف ما تدفع مقابله، ويبقى ما تملكه باسمك.</p></div>
+      <ul>{trust.map((item) => <li key={item.title}><strong>{item.title}</strong><span>{item.text}</span></li>)}</ul>
     </div></section>
 
     <section className={styles.section}><div className={styles.wrap + " " + styles.scopeGrid}>
