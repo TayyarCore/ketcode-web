@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { isFactoryStaff } from "../../lib/factory/staff";
 import { requirePortalEmail } from "../../lib/factory/auth";
 import { findProject, listProjects, newAccessCode, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
@@ -207,6 +208,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const canDemo = process.env.VERCEL_ENV === "preview";
   const demo = canDemo && params.demo === "1";
   const email = enabled && !demo ? await requirePortalEmail() : undefined;
+  if (email && isFactoryStaff(email) && !params.view && !params.project && !params.error) {
+    redirect("/portal/staff");
+  }
   const projects = email ? await listProjects(email).catch(() => null) : [];
   const showNew = params.view === "new";
   const showList = params.view === "projects";
