@@ -153,3 +153,38 @@ export async function updateLaunchDetails(email: string, id: string, details: {
   query.set("select", "id");
   return (await database(query, "PATCH", details)).length === 1;
 }
+
+export async function listStaffProjects() {
+  return database(new URLSearchParams({
+    select: projectColumns + ",email",
+    order: "created_at.desc,id.desc",
+  }));
+}
+
+export async function getStaffProjectLogo(id: string) {
+  if (!projectIdPattern.test(id)) return undefined;
+  const rows = await database(new URLSearchParams({ id: "eq." + id, select: "logo_data" }));
+  return (rows[0] as { logo_data?: string } | undefined)?.logo_data;
+}
+
+export async function updateStaffProjectStage(id: string, action: "build" | "review" | "launch", preview?: string) {
+  if (!projectIdPattern.test(id)) return false;
+  const query = new URLSearchParams({ id: "eq." + id, select: "id" });
+  if (action === "build") {
+    query.set("stage", "eq.received");
+    return (await database(query, "PATCH", { stage: "building" })).length === 1;
+  }
+  if (action === "review") {
+    if (!preview || !safePreview(preview)) return false;
+    query.set("stage", "in.(received,building)");
+    return (await database(query, "PATCH", { stage: "review", preview_url: preview })).length === 1;
+  }
+  const projects = await database(new URLSearchParams({ id: "eq." + id, select: projectColumns }));
+  const project = projects[0];
+  if (!project || project.stage !== "paid" || !project.preview_url ||
+      project.preview_url !== project.approved_preview_url || !project.launch_domain_type || !project.launch_email_type) return false;
+  query.set("stage", "eq.paid");
+  query.set("preview_url", "eq." + project.preview_url);
+  query.set("approved_preview_url", "eq." + project.preview_url);
+  return (await database(query, "PATCH", { stage: "launched" })).length === 1;
+}

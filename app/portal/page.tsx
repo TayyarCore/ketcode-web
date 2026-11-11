@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { isFactoryStaff } from "../../lib/factory/staff";
 import { requirePortalEmail } from "../../lib/factory/auth";
 import { findProject, listProjects, newAccessCode, portalEnabled, safePreview, type Project } from "../../lib/factory/portal";
 import { acceptPreview, closeProject, registerProject, saveBusiness, saveContact, saveLaunchDetails, saveMaterials } from "./actions";
@@ -220,6 +222,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     <main className={styles.page}>
       <div className={styles.wrap}>
         <header><a href="/offers/real-estate">KETCODE</a><span>متابعة المشروع</span></header>
+        {email && isFactoryStaff(email) && <p><Link href="/portal/staff">طلبات العملاء</Link></p>}
         {error && <p className={styles.error} role="alert">{error}</p>}
         {project && params.saved === "launch" && <p role="status">تم حفظ بيانات الإطلاق.</p>}
         {project && params.saved === "business" && <p role="status">تم حفظ بيانات المنشأة.</p>}
