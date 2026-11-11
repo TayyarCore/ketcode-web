@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const pendingEmailCookie = "ketcode_pending_email";
+const pendingEmailOptions = { path: "/portal/login", maxAge: 3600 };
+
 const sessionCookie = "ketcode_factory_session";
 const cookieOptions = {
   path: "/portal",
@@ -26,6 +29,14 @@ async function authRequest(path: string, token?: string, body?: object) {
   }).catch(() => undefined);
 }
 
+export async function getPendingEmail() {
+  return (await cookies()).get(pendingEmailCookie)?.value;
+}
+
+export async function setPendingEmail(email: string) {
+  (await cookies()).set(pendingEmailCookie, email, { ...cookieOptions, ...pendingEmailOptions });
+}
+
 export async function sendCode(email: string) {
   return Boolean((await authRequest("otp", undefined, { email, create_user: true }))?.ok);
 }
@@ -35,10 +46,12 @@ export async function signIn(email: string, token: string) {
   if (!response?.ok) return false;
   const { access_token, expires_in } = await response.json();
   if (typeof access_token !== "string" || !Number.isFinite(expires_in) || expires_in <= 0) return false;
-  (await cookies()).set(sessionCookie, access_token, {
+  const store = await cookies();
+  store.set(sessionCookie, access_token, {
     ...cookieOptions,
     maxAge: Math.min(expires_in, 3600),
   });
+  store.set(pendingEmailCookie, "", { ...cookieOptions, ...pendingEmailOptions, maxAge: 0 });
   return true;
 }
 

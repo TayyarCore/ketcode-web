@@ -1,6 +1,7 @@
+import { getPendingEmail } from "../../../lib/factory/auth";
 import { portalEnabled } from "../../../lib/factory/portal";
 import styles from "../portal.module.css";
-import { requestCode, verifyCode } from "./actions";
+import { requestCode, resendCode, verifyCode } from "./actions";
 
 export const metadata = {
   title: "الدخول إلى بوابة العميل | Ketcode",
@@ -11,7 +12,8 @@ export default async function PortalLogin({ searchParams }: {
   searchParams: Promise<{ sent?: string; error?: string }>;
 }) {
   const { sent, error } = await searchParams;
-  const verify = sent === "1";
+  const pendingEmail = sent === "1" ? await getPendingEmail() : undefined;
+  const verify = Boolean(pendingEmail);
 
   return (
     <main className={styles.page}>
@@ -20,17 +22,23 @@ export default async function PortalLogin({ searchParams }: {
         <section className={styles.card}>
           <h1>الدخول إلى بوابة العميل</h1>
           {error && <p className={styles.error} role="alert">{error === "verify"
-            ? "تعذّر التحقق من الرمز. راجع البريد والرمز أو اطلب رمزًا جديدًا."
-            : "تعذّر إرسال الرمز الآن. راجع البريد وحاول مرة أخرى."}</p>}
+            ? "تعذّر التحقق من الرمز. تأكد منه أو اطلب رمزًا جديدًا."
+            : error === "expired" ? "انتهت خطوة التحقق. أدخل بريدك لطلب رمز جديد."
+            : "تعذّر إرسال الرمز الآن. حاول مرة أخرى بعد قليل."}</p>}
           {portalEnabled() ? (
             <form className={styles.form} action={verify ? verifyCode : requestCode}>
-              <p>{verify ? "أدخل الرمز الذي وصلك والبريد الذي طلبت الرمز عليه." : "أرسل رمز دخول إلى بريدك الإلكتروني."}</p>
-              <label>البريد الإلكتروني<input name="email" type="email" autoComplete="email" maxLength={254} required dir="ltr" /></label>
+              <p>{verify ? <>أدخل الرمز المرسل إلى <bdi>{pendingEmail}</bdi>.</> : "أرسل رمز دخول إلى بريدك الإلكتروني."}</p>
+              {!verify && <label>البريد الإلكتروني<input name="email" type="email" autoComplete="email" maxLength={254} required dir="ltr" /></label>}
               {verify && <label>رمز التحقق<input name="token" autoComplete="one-time-code" inputMode="numeric" minLength={6} maxLength={10} required dir="ltr" /></label>}
               <button className={styles.button} type="submit">{verify ? "تحقق وادخل" : "أرسل الرمز"}</button>
-              {verify && <a href="/portal/login">اطلب رمزًا جديدًا</a>}
             </form>
           ) : <p>تسجيل الدخول غير متاح في هذه النسخة.</p>}
+          {verify && portalEnabled() && (
+            <form className={styles.actions} action={resendCode}>
+              <button className={styles.secondary} type="submit">اطلب رمزًا جديدًا</button>
+              <a href="/portal/login">تغيير البريد</a>
+            </form>
+          )}
         </section>
       </div>
     </main>

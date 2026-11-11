@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { sendCode, signIn } from "../../../lib/factory/auth";
+import { getPendingEmail, sendCode, setPendingEmail, signIn } from "../../../lib/factory/auth";
 import { portalEnabled } from "../../../lib/factory/portal";
 import { isRateLimited } from "../../../lib/rate-limit";
 
@@ -20,13 +20,25 @@ export async function requestCode(form: FormData) {
   if (!portalEnabled() || !email.success || await limited("send") || !await sendCode(email.data)) {
     redirect("/portal/login?error=send");
   }
+  await setPendingEmail(email.data);
+  redirect("/portal/login?sent=1");
+}
+
+export async function resendCode() {
+  const email = emailInput.safeParse(await getPendingEmail());
+  if (!email.success) redirect("/portal/login?error=expired");
+  if (!portalEnabled() || await limited("send") || !await sendCode(email.data)) {
+    redirect("/portal/login?sent=1&error=send");
+  }
+  await setPendingEmail(email.data);
   redirect("/portal/login?sent=1");
 }
 
 export async function verifyCode(form: FormData) {
-  const email = emailInput.safeParse(form.get("email"));
+  const email = emailInput.safeParse(await getPendingEmail());
+  if (!email.success) redirect("/portal/login?error=expired");
   const token = tokenInput.safeParse(form.get("token"));
-  if (!portalEnabled() || !email.success || !token.success || await limited("verify") ||
+  if (!portalEnabled() || !token.success || await limited("verify") ||
       !await signIn(email.data, token.data)) {
     redirect("/portal/login?sent=1&error=verify");
   }
