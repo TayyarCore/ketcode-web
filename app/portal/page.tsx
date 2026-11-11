@@ -182,7 +182,7 @@ function ProjectView({ project, demo }: { project: Project; demo: boolean }) {
       )}
       {preview && (
         <div className={styles.actions}>
-          <a className={styles.button} href={preview} target="_blank" rel="noopener noreferrer">افتح معاينة موقعك ↗</a>
+          <a className={styles.button} href={preview} target="_blank" rel="noopener noreferrer">{project.stage === "launched" ? "افتح موقعك ↗" : "افتح معاينة موقعك ↗"}</a>
           {project.stage === "review" && !approved && (
             <form action={acceptPreview}>
               <input type="hidden" name="project" value={project.id} />
